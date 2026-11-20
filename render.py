@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Render the make.fun news-image-20261119 entry 3/3 for agent 4.
 
-"Big Read": plum masthead with a giant serif date, ONE big GTA VI hero
-scene, 3 top stories with small scenes, 9 text-led stories, 20 one-line
+"Big Read" REBUILD #1: plum masthead with a giant serif date, KTT
+Shenzhen hero scene (three presidents at one table), 12 illustrated
+flagship cards (a small scene above every headline), 20 one-line
 briefs, numbers + region strips, DATE CHECK footer. 33 stories total.
 Drawn entirely with PIL primitives (no copied art). Output: entry.png,
 1024x1024, <= 1 MiB, deterministic.
@@ -34,10 +35,13 @@ _FALLBACK = {
 
 
 def F(name, size):
-    # Two DejaVu files in this VM are broken 14-byte stubs; fall back to
-    # the Liberation equivalents for those faces.
+    # Two DejaVu files in this VM are broken 14-byte stubs, two more are
+    # missing entirely; fall back to the Liberation equivalents for those
+    # faces (same metrics family, so layout is unchanged where DejaVu
+    # exists and still renders where it does not).
     path = os.path.join(FD, name)
-    if name in _FALLBACK and os.path.getsize(path) < 1000:
+    if name in _FALLBACK and (not os.path.exists(path)
+                              or os.path.getsize(path) < 1000):
         path = _FALLBACK[name]
     return ImageFont.truetype(path, size)
 
@@ -303,48 +307,295 @@ def scene_cop31(draw, x, y, w, h):
     draw.text((dx + dw - 44, dy + 20), "CUT", font=f, fill=BRICK)
 
 
+def draw_flag(draw, x, y, w, h, kind):
+    """Tiny US / CN / RU flag on a pole, drawn with rectangles only."""
+    draw.line([(x + w // 2, y - 14), (x + w // 2, y + h)], fill=(90, 70, 40),
+              width=2)
+    if kind == "US":
+        for i in range(7):
+            draw.rectangle([x, y + i * h // 7, x + w, y + (i + 1) * h // 7],
+                           fill=(178, 34, 52) if i % 2 == 0 else (255, 255, 255))
+        draw.rectangle([x, y, x + w * 0.45, y + h * 0.55], fill=NAVY)
+    elif kind == "CN":
+        draw.rectangle([x, y, x + w, y + h], fill=(222, 41, 16))
+        draw.text((x + 4, y + 2), "\u2605", font=SANS_B(11), fill=GOLD_LT)
+    else:  # RU
+        for i, col in enumerate([(255, 255, 255), (0, 57, 166), (213, 0, 50)]):
+            draw.rectangle([x, y + i * h // 3, x + w, y + (i + 1) * h // 3],
+                           fill=col)
+
+
+def scene_apec_hero(draw, x, y, w, h):
+    """Hero: three presidents at one summit table, flags behind them,
+    gold APEC 2026 SHENZHEN banner on top."""
+    draw.rectangle([x, y, x + w, y + h], fill=(38, 54, 88))
+    # pale window glow behind the table
+    draw.rectangle([x + 40, y + 22, x + w - 40, y + h - 20],
+                   fill=(64, 84, 124))
+    f = SANS_B(11)
+    label = "APEC 2026 \u00b7 SHENZHEN"
+    tw = draw.textlength(label, font=f)
+    draw.rectangle([x, y, x + w, y + 15], fill=GOLD)
+    draw.text((x + (w - tw) / 2, y + 2), label, font=f, fill=NAVY)
+    step = w // 3
+    for i, kind in enumerate(("US", "CN", "RU")):
+        cx = x + step * i + step // 2
+        draw_flag(draw, cx - 68, y + 34, 34, 22, kind)
+    table_y = y + h - 16
+    draw.rectangle([x + 4, table_y, x + w - 4, y + h], fill=(122, 84, 52),
+                   outline=INK, width=1)
+    draw_leader(draw, x + step // 2, table_y, (30, 30, 34), BRICK,
+                (226, 196, 90), "TRUMP", "sweep", body_h=42, r=15, label=True)
+    draw_leader(draw, x + step + step // 2, table_y, (30, 30, 34), BRICK,
+                (20, 20, 20), "XI", "flat", body_h=42, r=15, label=True)
+    draw_leader(draw, x + 2 * step + step // 2, table_y, (30, 30, 34),
+                (40, 80, 160), (200, 200, 200), "PUTIN", "recede",
+                body_h=42, r=15, label=True)
+
+
+def scene_gta_mini(draw, x, y, w, h):
+    """Mini Vice City scene: purple sunset, skyline, low car, big VI."""
+    bands = [((88, 40, 120), 0.0, 0.45), ((168, 62, 138), 0.45, 0.72),
+             ((226, 122, 66), 0.72, 1.0)]
+    for col, a, b in bands:
+        draw.rectangle([x, y + h * a, x + w, y + h * b], fill=col)
+    horizon = y + h - 12
+    for bx, bh, bw in [(0, 16, 34), (36, 24, 26), (64, 18, 30), (96, 26, 24),
+                       (122, 16, 32), (156, 24, 26), (184, 18, 30),
+                       (216, 26, 24), (242, 16, 32), (276, 24, 26),
+                       (304, 18, 24)]:
+        draw.rectangle([x + bx, horizon - bh, x + bx + bw, horizon],
+                       fill=(52, 26, 78), outline=INK, width=1)
+    draw.rectangle([x, horizon, x + w, y + h], fill=(36, 30, 40))
+    cx0, cy0 = x + w - 108, horizon + 2
+    draw.rounded_rectangle([cx0, cy0, cx0 + 62, cy0 + 7], radius=3,
+                           fill=(198, 60, 90), outline=INK, width=1)
+    draw.polygon([(cx0 + 14, cy0), (cx0 + 22, cy0 - 6), (cx0 + 42, cy0 - 6),
+                  (cx0 + 50, cy0)], fill=(120, 30, 60), outline=INK)
+    f = SERIF_B(30)
+    draw.text((x + 8, y + 2), "VI", font=f, fill=(52, 26, 78))
+    draw.text((x + 6, y), "VI", font=f, fill=(255, 255, 255))
+    bf = SANS_B(9)
+    t = "OUT NOW"
+    tw = draw.textlength(t, font=bf)
+    draw.rectangle([x + w - tw - 16, y + 4, x + w - 6, y + 17], fill=GOLD,
+                   outline=INK, width=1)
+    draw.text((x + w - tw - 10, y + 6), t, font=bf, fill=PLUM_DK)
+
+
+def scene_kerch(draw, x, y, w, h):
+    """Kerch Bridge: deck on pylons over water, smoke rising."""
+    draw.rectangle([x, y, x + w, y + h], fill=(214, 226, 232))
+    wy = y + h - 8
+    draw.rectangle([x, wy, x + w, y + h], fill=(64, 110, 150))
+    dy = y + 16
+    draw.rectangle([x + 6, dy, x + w - 6, dy + 4], fill=(90, 90, 96),
+                   outline=INK, width=1)
+    for px in (x + 70, x + w - 90):
+        draw.rectangle([px, dy - 10, px + 5, wy], fill=(90, 90, 96),
+                       outline=INK, width=1)
+        draw.line([(px + 2, dy - 10), (px + 2, dy)], fill=(90, 90, 96), width=2)
+    draw.arc([x + 70, dy - 8, x + w - 85, dy + 10], 180, 360, fill=(90, 90, 96),
+             width=2)
+    for sx, sy, sr in [(x + 150, y + 6, 7), (x + 168, y + 2, 9),
+                       (x + 186, y + 8, 6)]:
+        draw.ellipse([sx - sr, sy - sr, sx + sr, sy + sr], fill=(120, 120, 120),
+                     outline=(80, 80, 80), width=1)
+
+
+def scene_riyadh(draw, x, y, w, h):
+    """Riyadh night: tower silhouette, missile streak, impact burst."""
+    draw.rectangle([x, y, x + w, y + h], fill=(24, 28, 52))
+    for sx, sy in [(x + 30, y + 6), (x + 90, y + 12), (x + 250, y + 5),
+                   (x + 300, y + 14)]:
+        draw.ellipse([sx, sy, sx + 2, sy + 2], fill=(255, 255, 255))
+    tx = x + 60
+    draw.rectangle([tx, y + 8, tx + 26, y + h], fill=(52, 60, 96),
+                   outline=INK, width=1)
+    draw.polygon([(tx + 4, y + 8), (tx + 13, y - 2), (tx + 22, y + 8)],
+                 fill=(52, 60, 96), outline=INK)
+    for wy in range(y + 14, y + h - 2, 8):
+        draw.rectangle([tx + 6, wy, tx + 11, wy + 3], fill=GOLD_LT)
+        draw.rectangle([tx + 15, wy + 4, tx + 20, wy + 7], fill=GOLD_LT)
+    # incoming missile streak + orange burst at the tower top
+    draw.line([(x + w - 20, y + 2), (tx + 26, y + 10)], fill=(255, 180, 80),
+              width=2)
+    bx, by = tx + 26, y + 10
+    for dx, dy in [(0, -9), (7, -6), (9, 0), (7, 6), (0, 9), (-7, 6),
+                   (-9, 0), (-7, -6)]:
+        draw.line([(bx, by), (bx + dx, by + dy)], fill=(255, 140, 40), width=2)
+    draw.ellipse([bx - 4, by - 4, bx + 4, by + 4], fill=(255, 200, 90),
+                 outline=INK, width=1)
+
+
+def scene_akvan(draw, x, y, w, h):
+    """Cyclone Akvan: spiral over a coastline map."""
+    draw.rectangle([x, y, x + w, y + h], fill=(178, 214, 222))
+    # land (left) vs sea (right)
+    draw.polygon([(x, y), (x + 120, y), (x + 96, y + h), (x, y + h)],
+                 fill=(232, 220, 180), outline=INK)
+    draw.text((x + 14, y + h - 14), "ODISHA", font=SANS_B(9), fill=(120, 90, 40))
+    cx, cy = x + 210, y + h // 2
+    for r in (22, 16, 10, 5):
+        draw.arc([cx - r, cy - r, cx + r, cy + r], 20, 300, fill=TEAL, width=3)
+    draw.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=BRICK)
+
+
+def scene_seoul(draw, x, y, w, h):
+    """Seoul court: wooden gavel over its sound block."""
+    draw.rectangle([x, y, x + w, y + h], fill=(232, 224, 208))
+    draw.rectangle([x + 130, y + h - 10, x + 200, y + h - 4], fill=(122, 84, 52),
+                   outline=INK, width=1)
+    # gavel head, tilted, above the block
+    draw.polygon([(x + 128, y + 8), (x + 196, y + 8), (x + 196, y + 18),
+                  (x + 128, y + 18)], fill=(122, 84, 52), outline=INK)
+    draw.rectangle([x + 124, y + 6, x + 132, y + 20], fill=(90, 60, 36),
+                   outline=INK, width=1)
+    draw.rectangle([x + 192, y + 6, x + 200, y + 20], fill=(90, 60, 36),
+                   outline=INK, width=1)
+    draw.line([(x + 162, y + 18), (x + 162, y + h - 10)], fill=(90, 60, 36),
+              width=4)
+    draw.text((x + 14, y + 10), "COURT", font=SERIF_B(15), fill=NAVY)
+
+
+def scene_greenland(draw, x, y, w, h):
+    """Greenland: Arctic map outline + ballot box stamped 109-0."""
+    draw.rectangle([x, y, x + w, y + h], fill=(206, 224, 236))
+    draw.polygon([(x + 20, y + 6), (x + 110, y + 4), (x + 128, y + 16),
+                  (x + 96, y + 30), (x + 40, y + 28), (x + 14, y + 16)],
+                 fill=(255, 255, 255), outline=NAVY, width=1)
+    draw.text((x + 34, y + 12), "GREENLAND", font=SANS_B(9), fill=NAVY)
+    bx, by = x + 210, y + 6
+    draw.rectangle([bx, by, bx + 96, by + 22], fill=(255, 255, 255),
+                   outline=INK, width=1)
+    draw.rectangle([bx + 8, by - 0, bx + 88, by + 3], fill=INK)
+    draw.line([(bx + 40, by + 2), (bx + 56, by + 2)], fill=(255, 255, 255),
+              width=2)
+    f = SANS_B(13)
+    t = "109\u20130"
+    tw = draw.textlength(t, font=f)
+    draw.text((bx + (96 - tw) / 2, by + 7), t, font=f, fill=BRICK)
+
+
+def scene_anthropic(draw, x, y, w, h):
+    """Anthropic IPO: share-price line climbing steeply."""
+    draw.rectangle([x, y, x + w, y + h], fill=(255, 255, 255))
+    draw.line([(x + 16, y + 6), (x + 16, y + h - 6)], fill=GREY, width=1)
+    draw.line([(x + 16, y + h - 6), (x + w - 10, y + h - 6)], fill=GREY, width=1)
+    pts = [(x + 22, y + 28), (x + 80, y + 26), (x + 140, y + 22),
+           (x + 200, y + 16), (x + 260, y + 10), (x + 300, y + 4)]
+    draw.line(pts, fill=TEAL, width=3)
+    draw.polygon([(x + 300, y + 4), (x + 288, y + 4), (x + 300, y + 12)],
+                 fill=TEAL)
+    draw.ellipse([x + 296, y, x + 304, y + 8], fill=BRICK, outline=INK, width=1)
+    f = SANS_B(12)
+    draw.text((x + 24, y + 4), "+17%", font=f, fill=TEAL)
+
+
+def scene_bogota(draw, x, y, w, h):
+    """Bogota strike: crowd heads + a placard."""
+    draw.rectangle([x, y, x + w, y + h], fill=(246, 232, 200))
+    cols = [(30, 26, 34), (74, 32, 72), (163, 51, 39), (24, 96, 92),
+            (31, 42, 68)]
+    for i in range(9):
+        cx = x + 16 + i * 18
+        draw.ellipse([cx - 7, y + 12, cx + 7, y + 26], fill=cols[i % 5],
+                     outline=INK, width=1)
+        draw.rectangle([cx - 9, y + 24, cx + 9, y + h], fill=cols[i % 5],
+                       outline=INK, width=1)
+    px, py = x + 200, y + 4
+    draw.rectangle([px, py, px + 108, py + 20], fill=(255, 255, 255),
+                   outline=INK, width=1)
+    draw.line([(px + 54, py + 20), (px + 54, y + h)], fill=(90, 60, 36), width=3)
+    draw.text((px + 10, py + 4), "PARO NACIONAL", font=SANS_B(11), fill=BRICK)
+
+
+def scene_nairobi(draw, x, y, w, h):
+    """Nairobi marathon: running track lanes + a runner."""
+    draw.rectangle([x, y, x + w, y + h], fill=(232, 220, 200))
+    for i, yy in enumerate((y + 8, y + 18, y + 28)):
+        draw.rectangle([x, yy, x + w, yy + 6], fill=(178, 84, 52))
+        draw.line([(x, yy + 3), (x + w, yy + 3)], fill=(255, 255, 255), width=1)
+    # runner: head, torso, limbs mid-stride
+    hx, hy = x + 250, y + 8
+    draw.ellipse([hx - 5, hy - 5, hx + 5, hy + 5], fill=(90, 60, 40),
+                 outline=INK, width=1)
+    draw.line([(hx, hy + 5), (hx - 2, hy + 16)], fill=(90, 60, 40), width=3)
+    draw.line([(hx - 2, hy + 16), (hx - 12, hy + 26)], fill=(90, 60, 40),
+              width=3)
+    draw.line([(hx - 2, hy + 16), (hx + 10, hy + 22)], fill=(90, 60, 40),
+              width=3)
+    draw.line([(hx, hy + 8), (hx - 10, hy + 14)], fill=(90, 60, 40), width=2)
+    draw.line([(hx, hy + 8), (hx + 10, hy + 4)], fill=(90, 60, 40), width=2)
+
+
+def scene_canberra(draw, x, y, w, h):
+    """Canberra jobs: bar chart of the jobless rate climbing to 4.9%."""
+    draw.rectangle([x, y, x + w, y + h], fill=(255, 255, 255))
+    base = y + h - 6
+    draw.line([(x + 14, base), (x + w - 10, base)], fill=GREY, width=1)
+    vals = [("4.1", 12), ("4.3", 16), ("4.6", 20), ("4.9", 24)]
+    for i, (lbl, bh) in enumerate(vals):
+        bx = x + 60 + i * 62
+        col = PLUM if i == 3 else NAVY
+        draw.rectangle([bx, base - bh, bx + 34, base], fill=col, outline=INK,
+                       width=1)
+        f = SANS_B(9)
+        tw = draw.textlength(lbl + "%", font=f)
+        draw.text((bx + (34 - tw) / 2, base - bh - 12), lbl + "%", font=f,
+                  fill=col)
+
+
 # ------------------------------------------------------------------ content
-HERO = dict(num=1, kicker="WORLDWIDE \u00b7 GAMES \u2014 OUT NOW",
-            headline="GTA VI is out \u2014 Vice City opens after 13 years",
-            deck="Midnight launch worldwide \u00b7 99 on Metacritic \u00b7 $79.99 \u2014 "
-                 "Rockstar\u2019s sequel to 2013\u2019s GTA V. (Rockstar \u00b7 press)",
-            scene=scene_gta)
+HERO = dict(num=2, kicker="SHENZHEN \u00b7 SUMMIT \u2014 APEC 2026",
+            headline="Trump, Xi and Putin share one table",
+            deck="90 minutes at Kylin Villa; Declaration on Peace on nuclear "
+                 "risk & UN reform. (Reuters)",
+            scene=scene_apec_hero)
 
 TOP3 = [
-    dict(num=2, kicker="SHENZHEN \u00b7 SUMMIT",
-         headline="Trump, Xi and Putin share one table",
-         deck="90 minutes at Kylin Villa; peace declaration. (Reuters)",
-         scene=scene_apec),
     dict(num=3, kicker="THE HAGUE \u00b7 WORLD COURT",
          headline="Myanmar guilty of genocide",
-         deck="First state guilty of genocide in 80 years. (Al Jazeera)",
+         deck="9\u20136 vote; reparations ordered. (Al Jazeera)",
          scene=scene_icj),
     dict(num=4, kicker="ANTALYA \u00b7 CLIMATE",
          headline="COP31 draft drops fossil fuels",
          deck="$120bn adaptation aid goal cut from draft. (Reuters)",
          scene=scene_cop31),
+    dict(num=1, kicker="WORLDWIDE \u00b7 GAMES \u2014 OUT NOW",
+         headline="GTA VI is out \u2014 Vice City opens after 13 years",
+         deck="Midnight launch \u00b7 rave reviews \u00b7 $79.99. (Rockstar)",
+         scene=scene_gta_mini),
 ]
 
 TEXT9 = [
     dict(num=5, kicker="CRIMEA \u00b7 WAR", headline="Ukraine hits Kerch Bridge again",
-         deck="Strike halts trains hours before the summit. (Reuters)", tag="CLAIM"),
-    dict(num=6, kicker="RIYADH \u00b7 WAR", headline="Saudis shoot down Houthi missiles",
-         deck="Missiles intercepted over the capital. (Reuters \u00b7 AFP)",
-         tag="CLAIM"),
+         deck="Third strike in a week halts trains. (Reuters)", tag="CLAIM",
+         scene=scene_kerch),
+    dict(num=6, kicker="RIYADH \u00b7 WAR", headline="Houthi missiles hit Riyadh tower",
+         deck="Missiles strike PIF Tower in the capital. (Reuters \u00b7 AFP)",
+         tag="REPORTED", scene=scene_riyadh),
     dict(num=7, kicker="ODISHA \u00b7 STORM", headline="Cyclone Akvan nears India\u2019s coast",
-         deck="Odisha evacuates 120,000; landfall Friday. (Reuters)"),
-    dict(num=8, kicker="SEOUL \u00b7 JUSTICE", headline="Court clears ex-PM Han",
-         deck="Top court clears former prime minister in a retrial. (AP)"),
+         deck="Odisha evacuates 120,000; landfall Friday. (Reuters)",
+         scene=scene_akvan),
+    dict(num=8, kicker="SEOUL \u00b7 JUSTICE", headline="Top court orders Han retrial",
+         deck="Court overturns part of ex-PM Han\u2019s conviction. (AP)",
+         scene=scene_seoul),
     dict(num=9, kicker="GREENLAND \u00b7 SECURITY", headline="Denmark backs Arctic pact, 109\u20130",
-         deck="Parliament votes unanimously for the US pact. (Reuters)"),
+         deck="Parliament votes unanimously for the US pact. (Reuters)",
+         scene=scene_greenland),
     dict(num=10, kicker="NEW YORK \u00b7 MARKETS", headline="Anthropic lists; shares jump 17%",
-         deck="$81.3bn IPO closes at $97.17 on Nasdaq. (Reuters)"),
+         deck="$81.3bn valuation; closes at $97.17. (Reuters)",
+         scene=scene_anthropic),
     dict(num=11, kicker="BOGOT\u00c1 \u00b7 LABOUR", headline="Unions hold national strike",
-         deck="Paro nacional disrupts cities nationwide. (Reuters)"),
+         deck="Paro nacional disrupts cities nationwide. (Reuters)",
+         scene=scene_bogota),
     dict(num=12, kicker="NAIROBI \u00b7 SPORT", headline="Marathon champion banned 3 years",
-         deck="Jepchirchir suspended for doping. (AP)"),
+         deck="Jepchirchir suspended for doping. (AP)",
+         scene=scene_nairobi),
     dict(num=13, kicker="CANBERRA \u00b7 ECONOMY", headline="Jobless rate hits 4.9%",
-         deck="Australia\u2019s jobless rate rises to 4.9%. (ABC)"),
+         deck="Australia\u2019s jobless rate rises to 4.9%. (ABC)",
+         scene=scene_canberra),
 ]
 
 BRIEFS = [
@@ -461,12 +712,13 @@ def main():
             d.line([(x, y + 2), (x, y + 38)], fill=(190, 180, 165), width=1)
     hline(d, X0, X1, 158, fill=INK, w=1)
 
-    # ---- HERO: one big GTA VI scene + headline band
+    # ---- HERO: KTT Shenzhen scene + headline band (rebuild #1: the
+    # summit, not the game, leads the page)
     y = 164
-    HH = 214
+    HH = 196
     d.rectangle([X0, y, X1, y + HH], fill=(255, 255, 255), outline=INK, width=1)
-    HERO["scene"](d, X0 + 1, y + 1, CW - 2, 140)
-    ty = y + 146
+    HERO["scene"](d, X0 + 1, y + 1, CW - 2, 128)
+    ty = y + 134
     badge_num(d, X0 + 10, ty + 2, HERO["num"], 18)
     d.text((X0 + 34, ty + 4), HERO["kicker"], font=SANS_B(11), fill=PLUM)
     tag(d, X1 - 92, ty + 3, "REPORTED")
@@ -475,14 +727,14 @@ def main():
     d.text((X0 + 10, ty + 50), fit_one(d, HERO["deck"], SANS(13), CW - 20),
            font=SANS(13), fill=INK)
 
-    # ---- top 3 stories with small scenes
-    y = 384
-    TH, TW = 124, 329
+    # ---- top 3 stories with small scenes (ICJ, COP31, GTA VI)
+    y = 366
+    TH, TW = 122, 329
     for i, story in enumerate(TOP3):
         x = X0 + i * (TW + 8)
         d.rectangle([x, y, x + TW, y + TH], fill=(255, 255, 255), outline=INK, width=1)
-        story["scene"](d, x + 1, y + 1, TW - 2, 52)
-        ty = y + 57
+        story["scene"](d, x + 1, y + 1, TW - 2, 48)
+        ty = y + 53
         badge_num(d, x + 6, ty, story["num"], 15)
         d.text((x + 25, ty + 2), story["kicker"], font=SANS_B(9), fill=PLUM)
         tag(d, x + TW - 70, ty + 1, "REPORTED")
@@ -491,9 +743,10 @@ def main():
         d.text((x + 6, ty2 + 2),
                fit_one(d, story["deck"], SANS(11), TW - 12), font=SANS(11), fill=INK)
 
-    # ---- 9 text-led stories, 3 rows x 3 columns (no scenes: air + big type)
-    y0 = 514
-    CH, CWd = 76, 329
+    # ---- 9 flagship stories, 3 rows x 3 columns: each with a mini scene
+    # above its headline (rebuild #1: no more text-only cards)
+    y0 = 494
+    CH, CWd = 88, 329
     for r in range(3):
         for c in range(3):
             story = TEXT9[r * 3 + c]
@@ -501,27 +754,28 @@ def main():
             yy = y0 + r * (CH + 6)
             d.rectangle([x, yy, x + CWd, yy + CH], fill=(255, 255, 255),
                         outline=INK, width=1)
-            d.rectangle([x, yy, x + CWd, yy + 3], fill=PLUM_LT)
-            badge_num(d, x + 6, yy + 9, story["num"], 15)
-            d.text((x + 25, yy + 11), story["kicker"], font=SANS_B(10), fill=PLUM)
-            tag(d, x + CWd - 70, yy + 10, story.get("tag", "REPORTED"))
-            hl = wrap(d, story["headline"], SERIF_B(15), CWd - 12)
-            ty2 = text_block(d, x + 6, yy + 28, hl[:2], SERIF_B(15), INK, leading=16)
-            d.text((x + 6, yy + 60),
+            story["scene"](d, x + 1, yy + 1, CWd - 2, 36)
+            badge_num(d, x + 6, yy + 41, story["num"], 15)
+            d.text((x + 25, yy + 43), story["kicker"], font=SANS_B(10), fill=PLUM)
+            tag(d, x + CWd - 70, yy + 42, story.get("tag", "REPORTED"))
+            d.text((x + 6, yy + 58),
+                   fit_one(d, story["headline"], SERIF_B(15), CWd - 12),
+                   font=SERIF_B(15), fill=INK)
+            d.text((x + 6, yy + 74),
                    fit_one(d, story["deck"], SANS(11), CWd - 12),
                    font=SANS(11), fill=INK)
 
     # ---- briefs: 20 one-liners, 2 columns x 10 rows
-    y = 760
-    d.text((X0, y), "ALSO ON THURSDAY 19 NOVEMBER 2026", font=SANS_B(12), fill=INK)
+    y = 776
+    d.text((X0, y), "ALSO ON THURSDAY 19 NOVEMBER 2026", font=SANS_B(14), fill=INK)
     r = "place \u00b7 what happened \u00b7 source"
-    d.text((X1 - d.textlength(r, font=SANS_O(9)), y + 2), r, font=SANS_O(9),
+    d.text((X1 - d.textlength(r, font=SANS_O(9)), y + 4), r, font=SANS_O(9),
            fill=GREY)
     col_w = (CW - 12) / 2
     f_b, f_r = SANS_B(11), SANS(11)
     for ci in range(2):
         col_items = BRIEFS[ci * 10:(ci + 1) * 10]
-        yy = y + 18
+        yy = y + 20
         cx0 = X0 + ci * (col_w + 12)
         for num, place, text, src in col_items:
             head = "%d %s \u2014 " % (num, place)
@@ -535,11 +789,11 @@ def main():
             # rest may have been truncated: recompute from the fitted line
             fitted_rest = line[len(head):]
             d.text((nx, yy), fitted_rest, font=f_r, fill=INK)
-            yy += 13
+            yy += 12
 
     # ---- footer: DATE CHECK box
-    y = 914
-    d.rectangle([X0, y, X1, y + 56], outline=PLUM, width=2)
+    y = 920
+    d.rectangle([X0, y, X1, y + 52], outline=PLUM, width=2)
     f = SANS(10)
     lines = wrap(d, DATE_CHECK, f, CW - 20)
     text_block(d, X0 + 10, y + 6, lines, f, INK, leading=13)
