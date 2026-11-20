@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Render the make.fun news-image-20261119 entry 3/3 for agent 4.
 
-"Big Read" REBUILD #2: plum masthead with a giant serif date, KTT
-Shenzhen hero scene (three presidents at one table), 12 illustrated
-flagship cards (a small scene above every headline), 18 one-line
-briefs, numbers + region strips, a small WHERE IT HAPPENED map beside
-the briefs, DATE CHECK footer. 31 stories total. Bigger type throughout
-(card headlines 17pt, decks 12pt, briefs 12pt, footer 11pt) so the page
-stays readable at 300px. Drawn entirely with PIL primitives (no copied
-art). Output: entry.png, 1024x1024, <= 1 MiB, deterministic.
+"Big Read" REBUILD #3: plum masthead with a giant serif date, KTT
+Shenzhen hero scene (three presidents at one table), 3 LEAD panels
+(ICJ, COP31, GTA VI) at ~1.5x ordinary-card height with 20pt
+headlines, 9 illustrated flagship cards, 18 one-line briefs numbered
+14-31 without gaps, numbers + region strips, a small WHERE IT HAPPENED
+map beside the briefs, DATE CHECK footer. 31 stories total. Drawn
+entirely with PIL primitives (no copied art). Output: entry.png,
+1024x1024, <= 1 MiB, deterministic.
 """
 import os
 from PIL import Image, ImageDraw, ImageFont
@@ -346,13 +346,16 @@ def scene_apec_hero(draw, x, y, w, h):
     table_y = y + h - 16
     draw.rectangle([x + 4, table_y, x + w - 4, y + h], fill=(122, 84, 52),
                    outline=INK, width=1)
+    # Shorter hero scene (h ~80): shrink the leaders so their heads
+    # clear the gold banner (face top = table_y - body_h - 8 - r).
+    body_h, r = (42, 15) if h >= 90 else (28, 12)
     draw_leader(draw, x + step // 2, table_y, (30, 30, 34), BRICK,
-                (226, 196, 90), "TRUMP", "sweep", body_h=42, r=15, label=True)
+                (226, 196, 90), "TRUMP", "sweep", body_h=body_h, r=r, label=True)
     draw_leader(draw, x + step + step // 2, table_y, (30, 30, 34), BRICK,
-                (20, 20, 20), "XI", "flat", body_h=42, r=15, label=True)
+                (20, 20, 20), "XI", "flat", body_h=body_h, r=r, label=True)
     draw_leader(draw, x + 2 * step + step // 2, table_y, (30, 30, 34),
                 (40, 80, 160), (200, 200, 200), "PUTIN", "recede",
-                body_h=42, r=15, label=True)
+                body_h=body_h, r=r, label=True)
 
 
 def scene_gta_mini(draw, x, y, w, h):
@@ -569,7 +572,7 @@ TOP3 = [
 ]
 
 TEXT9 = [
-    dict(num=5, kicker="CRIMEA \u00b7 WAR", headline="Ukraine hits Kerch Bridge again",
+    dict(num=5, kicker="CRIMEA \u00b7 WAR", headline="Russia reports Kerch Bridge hit",
          deck="Third strike in a week halts trains. (Reuters)", tag="CLAIM",
          scene=scene_kerch),
     dict(num=6, kicker="RIYADH \u00b7 WAR", headline="Houthi missiles strike Riyadh tower",
@@ -612,11 +615,11 @@ BRIEFS = [
     (24, "UK", "MAIB: Bayesian wind flaw.", "gov.uk"),
     (25, "JAKARTA", "Asset law passed.", "Reuters"),
     (26, "PRETORIA", "Bank holds rate at 7.25%.", "SABC"),
-    (28, "LIBYA", "Cocaine, pills seized in east.", "Reuters"),
-    (30, "USA", "AI cyber threats outpace defences.", "AP"),
-    (31, "SOMALIA", "Expels UAE envoy.", "Reuters"),
-    (32, "BRAZIL", "Lula backs 42-hour week.", "Reuters"),
-    (33, "S. KOREA", "Exports pass $1 trillion.", "Reuters"),
+    (27, "LIBYA", "Cocaine, pills seized in east.", "Reuters"),
+    (28, "USA", "AI cyber threats outpace defences.", "AP"),
+    (29, "SOMALIA", "Expels UAE envoy.", "Reuters"),
+    (30, "BRAZIL", "Lula backs 42-hour week.", "Reuters"),
+    (31, "S. KOREA", "Exports pass $1 trillion.", "Reuters"),
 ]
 
 REGIONS = [
@@ -690,10 +693,10 @@ MAP_DOTS = [
     (77.2, 28.6),     # 23 India
     (106.8, -6.2),    # 25 Jakarta
     (28.2, -25.7),    # 26 Pretoria
-    (13.2, 32.9),     # 28 Libya
-    (-87.6, 41.9),    # 30 USA (Chicago)
-    (48.0, 0.0),      # 31 Somalia
-    (-47.9, -15.8),   # 32 Brazil
+    (13.2, 32.9),     # 27 Libya
+    (-87.6, 41.9),    # 28 USA (Chicago)
+    (48.0, 0.0),      # 29 Somalia
+    (-47.9, -15.8),   # 30 Brazil
 ]
 
 _NA = [(-168, 66), (-158, 58), (-145, 60), (-135, 57), (-128, 50), (-124, 42),
@@ -846,7 +849,7 @@ def main():
                fill=(255, 255, 255))
         cx += wd + gap
 
-    # ---- numbers strip
+    # ---- numbers strip (rebuild #3: tightened to fund the lead panels)
     y = 119
     cell = CW / 6
     for i, (num, lbl) in enumerate(NUMBERS):
@@ -855,20 +858,20 @@ def main():
         d.text((x + (cell - d.textlength(num, font=f1)) / 2, y), num, font=f1,
                fill=PLUM if i % 2 == 0 else NAVY)
         f2 = SANS(10)
-        d.text((x + (cell - d.textlength(lbl, font=f2)) / 2, y + 28), lbl, font=f2,
+        d.text((x + (cell - d.textlength(lbl, font=f2)) / 2, y + 26), lbl, font=f2,
                fill=INK)
         if i:
-            d.line([(x, y + 2), (x, y + 38)], fill=(190, 180, 165), width=1)
-    hline(d, X0, X1, 158, fill=INK, w=1)
+            d.line([(x, y + 2), (x, y + 36)], fill=(190, 180, 165), width=1)
+    hline(d, X0, X1, 156, fill=INK, w=1)
 
-    # ---- HERO: KTT Shenzhen scene + headline band (rebuild #1: the
-    # summit, not the game, leads the page; rebuild #2: scene shorter,
-    # headline + deck bigger)
-    y = 164
-    HH = 170
+    # ---- HERO: KTT Shenzhen scene + headline band (rebuild #3: scene
+    # 96 -> 80px to fund the lead panels; leaders shrink so heads clear
+    # the banner and nameplates stay inside the scene)
+    y = 162
+    HH = 154
     d.rectangle([X0, y, X1, y + HH], fill=(255, 255, 255), outline=INK, width=1)
-    HERO["scene"](d, X0 + 1, y + 1, CW - 2, 96)
-    ty = y + 102
+    HERO["scene"](d, X0 + 1, y + 1, CW - 2, 80)
+    ty = y + 86
     badge_num(d, X0 + 10, ty + 2, HERO["num"], 18)
     d.text((X0 + 34, ty + 4), HERO["kicker"], font=SANS_B(11), fill=PLUM)
     tag(d, X1 - 92, ty + 3, "REPORTED")
@@ -877,27 +880,30 @@ def main():
     d.text((X0 + 10, ty + 50), fit_one(d, HERO["deck"], SANS(14), CW - 20),
            font=SANS(14), fill=INK)
 
-    # ---- top 3 stories with small scenes (ICJ, COP31, GTA VI)
-    y = 340
-    TH, TW = 122, 329
+    # ---- top 3 stories as LEAD PANELS (rebuild #3: ~1.5x ordinary-card
+    # height, 20pt headlines, 13pt decks, bigger scenes — the structural
+    # legibility lever: big panels survive at 300px where small type
+    # does not)
+    y = 322
+    TH, TW = 150, 329
     for i, story in enumerate(TOP3):
         x = X0 + i * (TW + 8)
         d.rectangle([x, y, x + TW, y + TH], fill=(255, 255, 255), outline=INK, width=1)
-        story["scene"](d, x + 1, y + 1, TW - 2, 48)
-        ty = y + 53
+        story["scene"](d, x + 1, y + 1, TW - 2, 56)
+        ty = y + 61
         badge_num(d, x + 6, ty, story["num"], 15)
         d.text((x + 25, ty + 2), story["kicker"], font=SANS_B(10), fill=PLUM)
         tag(d, x + TW - 70, ty + 1, "REPORTED")
-        hl = wrap(d, story["headline"], SERIF_B(17), TW - 12)
-        ty2 = text_block(d, x + 6, ty + 17, hl[:2], SERIF_B(17), INK, leading=18)
-        d.text((x + 6, ty2 + 2),
-               fit_one(d, story["deck"], SANS(12), TW - 12), font=SANS(12), fill=INK)
+        hl = wrap(d, story["headline"], SERIF_B(20), TW - 12)
+        ty2 = text_block(d, x + 6, ty + 17, hl[:2], SERIF_B(20), INK, leading=20)
+        deck_lines = wrap(d, story["deck"], SANS(13), TW - 12)[:2]
+        text_block(d, x + 6, ty + 60, deck_lines, SANS(13), INK, leading=15)
 
     # ---- 9 flagship stories, 3 rows x 3 columns: each with a mini scene
-    # above its headline (rebuild #1: no more text-only cards; rebuild #2:
-    # taller cards, 17pt headlines, 12pt decks wrapping to 2 lines)
-    y0 = 468
-    CH, CWd = 96, 329
+    # above its headline (rebuild #3: scene 28 -> 24px, card 96 -> 92px
+    # to help fund the lead panels; 17pt headlines, 12pt decks)
+    y0 = 478
+    CH, CWd = 92, 329
     for r in range(3):
         for c in range(3):
             story = TEXT9[r * 3 + c]
@@ -905,23 +911,23 @@ def main():
             yy = y0 + r * (CH + 6)
             d.rectangle([x, yy, x + CWd, yy + CH], fill=(255, 255, 255),
                         outline=INK, width=1)
-            story["scene"](d, x + 1, yy + 1, CWd - 2, 28)
-            badge_num(d, x + 6, yy + 32, story["num"], 15)
-            d.text((x + 25, yy + 34), story["kicker"], font=SANS_B(11), fill=PLUM)
-            tag(d, x + CWd - 70, yy + 33, story.get("tag", "REPORTED"))
+            story["scene"](d, x + 1, yy + 1, CWd - 2, 24)
+            badge_num(d, x + 6, yy + 28, story["num"], 15)
+            d.text((x + 25, yy + 30), story["kicker"], font=SANS_B(11), fill=PLUM)
+            tag(d, x + CWd - 70, yy + 29, story.get("tag", "REPORTED"))
             hfont = SERIF_B(17)
             while hfont.size > 14 and d.textlength(story["headline"],
                                                    font=hfont) > CWd - 12:
                 hfont = SERIF_B(hfont.size - 1)
-            d.text((x + 6, yy + 52), story["headline"], font=hfont, fill=INK)
+            d.text((x + 6, yy + 48), story["headline"], font=hfont, fill=INK)
             deck_lines = wrap(d, story["deck"], SANS(12), CWd - 12)[:2]
             if len(deck_lines) == 2:
                 deck_lines[1] = fit_one(d, deck_lines[1], SANS(12), CWd - 12)
-            text_block(d, x + 6, yy + 70, deck_lines, SANS(12), INK, leading=13)
+            text_block(d, x + 6, yy + 66, deck_lines, SANS(12), INK, leading=13)
 
     # ---- briefs: 18 one-liners, 2 columns x 9 rows, + WHERE IT HAPPENED
-    # map on the right (rebuild #2: bigger type + a map anchor)
-    y = 774
+    # map on the right (rebuild #3: briefs renumbered 14-31, no gaps)
+    y = 772
     d.text((X0, y), "ALSO ON THURSDAY 19 NOVEMBER 2026", font=SANS_B(14), fill=INK)
     brief_w = 656
     col_w = (brief_w - 12) / 2
