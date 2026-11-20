@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Render the make.fun news-image-20261119 entry 3/3 for agent 4.
 
-"Big Read" REBUILD #3: plum masthead with a giant serif date, KTT
-Shenzhen hero scene (three presidents at one table), 3 LEAD panels
-(ICJ, COP31, GTA VI) at ~1.5x ordinary-card height with 20pt
-headlines, 9 illustrated flagship cards, 18 one-line briefs numbered
-14-31 without gaps, numbers + region strips, a small WHERE IT HAPPENED
-map beside the briefs, DATE CHECK footer. 31 stories total. Drawn
-entirely with PIL primitives (no copied art). Output: entry.png,
-1024x1024, <= 1 MiB, deterministic.
+"Big Read" REBUILD #4: plum masthead with a giant serif date, KTT
+Shenzhen hero scene (three presidents at one table) with a 33pt
+headline, 3 LEAD panels (ICJ, COP31, GTA VI) at 162px height with
+22pt headlines and 13pt decks, 9 illustrated flagship cards at
+105px with 32px scenes and 13pt decks, 14 one-line briefs numbered
+14-27 without gaps, numbers + region strips, a small WHERE IT
+HAPPENED map beside the briefs, DATE CHECK footer. 27 stories
+total. Drawn entirely with PIL primitives (no copied art). Output:
+entry.png, 1024x1024, <= 1 MiB, deterministic.
 """
 import os
 from PIL import Image, ImageDraw, ImageFont
@@ -346,9 +347,9 @@ def scene_apec_hero(draw, x, y, w, h):
     table_y = y + h - 16
     draw.rectangle([x + 4, table_y, x + w - 4, y + h], fill=(122, 84, 52),
                    outline=INK, width=1)
-    # Shorter hero scene (h ~80): shrink the leaders so their heads
+    # Shorter hero scene (h ~74): shrink the leaders so their heads
     # clear the gold banner (face top = table_y - body_h - 8 - r).
-    body_h, r = (42, 15) if h >= 90 else (28, 12)
+    body_h, r = (42, 15) if h >= 90 else ((22, 10) if h >= 72 else (28, 12))
     draw_leader(draw, x + step // 2, table_y, (30, 30, 34), BRICK,
                 (226, 196, 90), "TRUMP", "sweep", body_h=body_h, r=r, label=True)
     draw_leader(draw, x + step + step // 2, table_y, (30, 30, 34), BRICK,
@@ -558,7 +559,7 @@ HERO = dict(num=2, kicker="SHENZHEN \u00b7 SUMMIT \u2014 APEC 2026",
 
 TOP3 = [
     dict(num=3, kicker="THE HAGUE \u00b7 WORLD COURT",
-         headline="Myanmar guilty of genocide",
+         headline="World Court holds Myanmar responsible",
          deck="9\u20136 vote; reparations ordered. (Al Jazeera)",
          scene=scene_icj),
     dict(num=4, kicker="ANTALYA \u00b7 CLIMATE",
@@ -567,7 +568,7 @@ TOP3 = [
          scene=scene_cop31),
     dict(num=1, kicker="WORLDWIDE \u00b7 GAMES \u2014 OUT NOW",
          headline="GTA VI is out \u2014 Vice City opens after 13 years",
-         deck="Midnight launch \u00b7 rave reviews \u00b7 $79.99 (Rockstar)",
+         deck="Rave reviews at midnight \u00b7 $79.99 (Rockstar)",
          scene=scene_gta_mini),
 ]
 
@@ -575,8 +576,8 @@ TEXT9 = [
     dict(num=5, kicker="CRIMEA \u00b7 WAR", headline="Russia reports Kerch Bridge hit",
          deck="Third strike in a week halts trains. (Reuters)", tag="CLAIM",
          scene=scene_kerch),
-    dict(num=6, kicker="RIYADH \u00b7 WAR", headline="Houthi missiles strike Riyadh tower",
-         deck="Saudis say defences shot most down; debris damages PIF Tower. (Reuters \u00b7 AFP)",
+    dict(num=6, kicker="RIYADH \u00b7 WAR", headline="Saudis: Houthi missiles hit Riyadh",
+         deck="Defences shot most down; debris damages PIF Tower. (Reuters \u00b7 AFP)",
          tag="CLAIM", scene=scene_riyadh),
     dict(num=7, kicker="ODISHA \u00b7 STORM", headline="Cyclone Akvan nears India\u2019s coast",
          deck="Odisha evacuates 120,000; landfall Fri. (Reuters)",
@@ -604,27 +605,23 @@ TEXT9 = [
 BRIEFS = [
     (14, "GOLD", "$3,757/oz, lowest since Sept.", "Reuters"),
     (15, "FINLAND", "Onkalo waste store OK'd.", "Reuters"),
-    (16, "ESTONIA", "To shut Russia border Dec.", "Reuters"),
-    (17, "CZECHIA", "Big Prague media protest.", "AP"),
-    (18, "SPAIN", "Strike hits ports, factories.", "Reuters"),
-    (19, "YEMEN", "Houthi rocket kills 53.", "Reuters"),
-    (20, "GERMANY", "Russian held for Palantir spying.", "AP"),
-    (21, "INDIA\u2013JAPAN", "2+2 talks in Tokyo.", "Reuters"),
-    (22, "WELLINGTON", "Equity pay cuts unlawful.", "RNZ"),
-    (23, "INDIA", "\u2018Ramayana\u2019 tops \u20b91,000 crore.", "AP"),
-    (24, "UK", "MAIB: Bayesian wind flaw.", "gov.uk"),
-    (25, "JAKARTA", "Asset law passed.", "Reuters"),
-    (26, "PRETORIA", "Bank holds rate at 7.25%.", "SABC"),
-    (27, "LIBYA", "Cocaine, pills seized in east.", "Reuters"),
-    (28, "USA", "AI cyber threats outpace defences.", "AP"),
-    (29, "SOMALIA", "Expels UAE envoy.", "Reuters"),
-    (30, "BRAZIL", "Lula backs 42-hour week.", "Reuters"),
-    (31, "S. KOREA", "Exports pass $1 trillion.", "Reuters"),
+    (16, "YEMEN", "Houthi rocket kills 53.", "Reuters"),
+    (17, "GERMANY", "Russian held for Palantir spying.", "AP"),
+    (18, "INDIA\u2013JAPAN", "2+2 talks in Tokyo.", "Reuters"),
+    (19, "WELLINGTON", "Equity pay cuts unlawful.", "RNZ"),
+    (20, "INDIA", "\u2018Ramayana\u2019 tops \u20b91,000 crore.", "AP"),
+    (21, "UK", "MAIB: Bayesian wind flaw.", "gov.uk"),
+    (22, "JAKARTA", "Asset law passed.", "Reuters"),
+    (23, "LIBYA", "Cocaine, pills seized in east.", "Reuters"),
+    (24, "USA", "AI cyber threats outpace defences.", "AP"),
+    (25, "SOMALIA", "Expels UAE envoy.", "Reuters"),
+    (26, "BRAZIL", "Lula backs 42-hour week.", "Reuters"),
+    (27, "S. KOREA", "Exports pass $1 trillion.", "Reuters"),
 ]
 
 REGIONS = [
-    ("ASIA 7", PLUM), ("MIDDLE EAST 2", (122, 74, 31)), ("EUROPE 8", NAVY),
-    ("AFRICA 4", (60, 120, 70)), ("AMERICAS 4", (110, 70, 140)),
+    ("ASIA 7", PLUM), ("MIDDLE EAST 2", (122, 74, 31)), ("EUROPE 5", NAVY),
+    ("AFRICA 3", (60, 120, 70)), ("AMERICAS 4", (110, 70, 140)),
     ("OCEANIA 2", TEAL), ("GLOBAL 4", GREY),
 ]
 
@@ -683,20 +680,16 @@ MAP_PINS = [
 MAP_DOTS = [
     (115.9, -31.9),   # 14 gold (Perth)
     (25.0, 60.0),     # 15 Finland
-    (28.0, 57.0),     # 16 Estonia
-    (16.0, 49.0),     # 17 Czechia
-    (-3.7, 40.3),     # 18 Spain
-    (45.0, 12.8),     # 19 Yemen
-    (13.4, 52.5),     # 20 Germany
-    (139.7, 35.7),    # 21 Tokyo
-    (174.8, -41.3),   # 22 Wellington
-    (77.2, 28.6),     # 23 India
-    (106.8, -6.2),    # 25 Jakarta
-    (28.2, -25.7),    # 26 Pretoria
-    (13.2, 32.9),     # 27 Libya
-    (-87.6, 41.9),    # 28 USA (Chicago)
-    (48.0, 0.0),      # 29 Somalia
-    (-47.9, -15.8),   # 30 Brazil
+    (45.0, 12.8),     # 16 Yemen
+    (13.4, 52.5),     # 17 Germany
+    (139.7, 35.7),    # 18 Tokyo
+    (174.8, -41.3),   # 19 Wellington
+    (77.2, 28.6),     # 20 India
+    (106.8, -6.2),    # 22 Jakarta
+    (13.2, 32.9),     # 23 Libya
+    (-87.6, 41.9),    # 24 USA (Chicago)
+    (48.0, 0.0),      # 25 Somalia
+    (-47.9, -15.8),   # 26 Brazil
 ]
 
 _NA = [(-168, 66), (-158, 58), (-145, 60), (-135, 57), (-128, 50), (-124, 42),
@@ -819,7 +812,7 @@ def main():
     # ---- kicker line
     y = 8
     d.text((X0, y), "THE WORLD IN ONE DAY", font=SANS_B(13), fill=PLUM)
-    r = "31 STORIES \u00b7 7 REGIONS \u00b7 ONE DAY"
+    r = "27 STORIES \u00b7 7 REGIONS \u00b7 ONE DAY"
     d.text((X1 - d.textlength(r, font=SANS_B(13)), y), r, font=SANS_B(13), fill=NAVY)
 
     # ---- plum masthead band: giant date + subhead inside the band
@@ -836,7 +829,7 @@ def main():
     d.text(((W - d.textlength(t, font=f)) / 2, y + 44), t, font=f, fill=GOLD_LT)
 
     # ---- region strip
-    y = 97
+    y = 95
     f = SANS_B(11)
     widths = [d.textlength(lbl, font=f) + 20 for lbl, _ in REGIONS]
     gap = 6
@@ -849,8 +842,8 @@ def main():
                fill=(255, 255, 255))
         cx += wd + gap
 
-    # ---- numbers strip (rebuild #3: tightened to fund the lead panels)
-    y = 119
+    # ---- numbers strip (rebuild #4: tightened to fund the lead panels)
+    y = 117
     cell = CW / 6
     for i, (num, lbl) in enumerate(NUMBERS):
         x = X0 + i * cell
@@ -858,52 +851,52 @@ def main():
         d.text((x + (cell - d.textlength(num, font=f1)) / 2, y), num, font=f1,
                fill=PLUM if i % 2 == 0 else NAVY)
         f2 = SANS(10)
-        d.text((x + (cell - d.textlength(lbl, font=f2)) / 2, y + 26), lbl, font=f2,
+        d.text((x + (cell - d.textlength(lbl, font=f2)) / 2, y + 24), lbl, font=f2,
                fill=INK)
         if i:
-            d.line([(x, y + 2), (x, y + 36)], fill=(190, 180, 165), width=1)
-    hline(d, X0, X1, 156, fill=INK, w=1)
+            d.line([(x, y + 2), (x, y + 34)], fill=(190, 180, 165), width=1)
+    hline(d, X0, X1, 153, fill=INK, w=1)
 
-    # ---- HERO: KTT Shenzhen scene + headline band (rebuild #3: scene
-    # 96 -> 80px to fund the lead panels; leaders shrink so heads clear
+    # ---- HERO: KTT Shenzhen scene + headline band (rebuild #4: scene
+    # 80 -> 74px, headline 28 -> 33pt; leaders shrink so heads clear
     # the banner and nameplates stay inside the scene)
-    y = 162
-    HH = 154
+    y = 155
+    HH = 162
     d.rectangle([X0, y, X1, y + HH], fill=(255, 255, 255), outline=INK, width=1)
-    HERO["scene"](d, X0 + 1, y + 1, CW - 2, 80)
-    ty = y + 86
+    HERO["scene"](d, X0 + 1, y + 1, CW - 2, 74)
+    ty = y + 80
     badge_num(d, X0 + 10, ty + 2, HERO["num"], 18)
     d.text((X0 + 34, ty + 4), HERO["kicker"], font=SANS_B(11), fill=PLUM)
     tag(d, X1 - 92, ty + 3, "REPORTED")
-    f = SERIF_B(28)
+    f = SERIF_B(33)
     d.text((X0 + 10, ty + 20), HERO["headline"], font=f, fill=INK)
-    d.text((X0 + 10, ty + 50), fit_one(d, HERO["deck"], SANS(14), CW - 20),
+    d.text((X0 + 10, ty + 62), fit_one(d, HERO["deck"], SANS(14), CW - 20),
            font=SANS(14), fill=INK)
 
-    # ---- top 3 stories as LEAD PANELS (rebuild #3: ~1.5x ordinary-card
-    # height, 20pt headlines, 13pt decks, bigger scenes — the structural
+    # ---- top 3 stories as LEAD PANELS (rebuild #4: 150 -> 162px tall,
+    # 22pt headlines, 13pt decks, 60px scenes — the structural
     # legibility lever: big panels survive at 300px where small type
     # does not)
-    y = 322
-    TH, TW = 150, 329
+    y = 323
+    TH, TW = 162, 329
     for i, story in enumerate(TOP3):
         x = X0 + i * (TW + 8)
         d.rectangle([x, y, x + TW, y + TH], fill=(255, 255, 255), outline=INK, width=1)
-        story["scene"](d, x + 1, y + 1, TW - 2, 56)
-        ty = y + 61
+        story["scene"](d, x + 1, y + 1, TW - 2, 60)
+        ty = y + 65
         badge_num(d, x + 6, ty, story["num"], 15)
         d.text((x + 25, ty + 2), story["kicker"], font=SANS_B(10), fill=PLUM)
         tag(d, x + TW - 70, ty + 1, "REPORTED")
-        hl = wrap(d, story["headline"], SERIF_B(20), TW - 12)
-        ty2 = text_block(d, x + 6, ty + 17, hl[:2], SERIF_B(20), INK, leading=20)
+        hl = wrap(d, story["headline"], SERIF_B(22), TW - 12)
+        ty2 = text_block(d, x + 6, ty + 17, hl[:2], SERIF_B(22), INK, leading=22)
         deck_lines = wrap(d, story["deck"], SANS(13), TW - 12)[:2]
-        text_block(d, x + 6, ty + 60, deck_lines, SANS(13), INK, leading=15)
+        text_block(d, x + 6, ty + 64, deck_lines, SANS(13), INK, leading=15)
 
     # ---- 9 flagship stories, 3 rows x 3 columns: each with a mini scene
-    # above its headline (rebuild #3: scene 28 -> 24px, card 96 -> 92px
-    # to help fund the lead panels; 17pt headlines, 12pt decks)
-    y0 = 478
-    CH, CWd = 92, 329
+    # above its headline (rebuild #4: scene 24 -> 32px, card 92 -> 105px,
+    # 17pt headlines, 12 -> 13pt decks)
+    y0 = 491
+    CH, CWd = 105, 329
     for r in range(3):
         for c in range(3):
             story = TEXT9[r * 3 + c]
@@ -911,29 +904,30 @@ def main():
             yy = y0 + r * (CH + 6)
             d.rectangle([x, yy, x + CWd, yy + CH], fill=(255, 255, 255),
                         outline=INK, width=1)
-            story["scene"](d, x + 1, yy + 1, CWd - 2, 24)
-            badge_num(d, x + 6, yy + 28, story["num"], 15)
-            d.text((x + 25, yy + 30), story["kicker"], font=SANS_B(11), fill=PLUM)
-            tag(d, x + CWd - 70, yy + 29, story.get("tag", "REPORTED"))
+            story["scene"](d, x + 1, yy + 1, CWd - 2, 32)
+            badge_num(d, x + 6, yy + 36, story["num"], 15)
+            d.text((x + 25, yy + 38), story["kicker"], font=SANS_B(11), fill=PLUM)
+            tag(d, x + CWd - 70, yy + 37, story.get("tag", "REPORTED"))
             hfont = SERIF_B(17)
             while hfont.size > 14 and d.textlength(story["headline"],
                                                    font=hfont) > CWd - 12:
                 hfont = SERIF_B(hfont.size - 1)
-            d.text((x + 6, yy + 48), story["headline"], font=hfont, fill=INK)
-            deck_lines = wrap(d, story["deck"], SANS(12), CWd - 12)[:2]
+            d.text((x + 6, yy + 54), story["headline"], font=hfont, fill=INK)
+            deck_lines = wrap(d, story["deck"], SANS(13), CWd - 12)[:2]
             if len(deck_lines) == 2:
-                deck_lines[1] = fit_one(d, deck_lines[1], SANS(12), CWd - 12)
-            text_block(d, x + 6, yy + 66, deck_lines, SANS(12), INK, leading=13)
+                deck_lines[1] = fit_one(d, deck_lines[1], SANS(13), CWd - 12)
+            text_block(d, x + 6, yy + 73, deck_lines, SANS(13), INK, leading=14)
 
-    # ---- briefs: 18 one-liners, 2 columns x 9 rows, + WHERE IT HAPPENED
-    # map on the right (rebuild #3: briefs renumbered 14-31, no gaps)
-    y = 772
+    # ---- briefs: 14 one-liners, 2 columns x 7 rows, + WHERE IT HAPPENED
+    # map on the right (rebuild #4: briefs cut 18 -> 14, renumbered 14-27,
+    # no gaps; ESTONIA / CZECHIA / SPAIN / PRETORIA cut as weakest)
+    y = 824
     d.text((X0, y), "ALSO ON THURSDAY 19 NOVEMBER 2026", font=SANS_B(14), fill=INK)
     brief_w = 656
     col_w = (brief_w - 12) / 2
     f_b, f_r = SANS_B(12), SANS(12)
     for ci in range(2):
-        col_items = BRIEFS[ci * 9:(ci + 1) * 9]
+        col_items = BRIEFS[ci * 7:(ci + 1) * 7]
         yy = y + 22
         cx0 = X0 + ci * (col_w + 12)
         for num, place, text, src in col_items:
@@ -948,16 +942,16 @@ def main():
             # rest may have been truncated: recompute from the fitted line
             fitted_rest = line[len(head):]
             d.text((nx, yy), fitted_rest, font=f_r, fill=INK)
-            yy += 14
-    draw_map(d, X0 + brief_w + 12, y, X1 - (X0 + brief_w + 12), 148)
+            yy += 13
+    draw_map(d, X0 + brief_w + 12, y, X1 - (X0 + brief_w + 12), 112)
 
-    # ---- footer: DATE CHECK box (rebuild #2: 11pt type)
-    y = 928
+    # ---- footer: DATE CHECK box (rebuild #4: 12pt leading)
+    y = 942
     f = SANS(11)
     lines = wrap(d, DATE_CHECK, f, CW - 20)
-    box_h = 10 + len(lines) * 13
+    box_h = 10 + len(lines) * 12
     d.rectangle([X0, y, X1, y + box_h], outline=PLUM, width=2)
-    text_block(d, X0 + 10, y + 5, lines, f, INK, leading=13)
+    text_block(d, X0 + 10, y + 5, lines, f, INK, leading=12)
 
     # ---- legend + sources
     y = y + box_h + 6

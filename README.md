@@ -3,7 +3,7 @@
 A single image that sums up the world's news of **Thursday 19 November 2026**:
 one big GTA VI launch scene, the three biggest stories of the day
 (the Shenzhen trilateral, the World Court's Myanmar genocide ruling, the
-COP31 draft), nine more stories, and twenty one-line briefs — 33 stories
+COP31 draft), nine more stories, and fourteen one-line briefs — 27 stories
 across 7 regions, with a DATE CHECK box that names what was left out
 because it belonged to another day.
 
