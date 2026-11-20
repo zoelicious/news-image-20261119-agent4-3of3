@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Render the make.fun news-image-20261119 entry 3/3 for agent 4.
 
-"Big Read" REBUILD #4: plum masthead with a giant serif date, KTT
-Shenzhen hero scene (three presidents at one table) with a 33pt
-headline, 3 LEAD panels (ICJ, COP31, GTA VI) at 162px height with
-22pt headlines and 13pt decks, 9 illustrated flagship cards at
-105px with 32px scenes and 13pt decks, 14 one-line briefs numbered
-14-27 without gaps, numbers + region strips, a small WHERE IT
-HAPPENED map beside the briefs, DATE CHECK footer. 27 stories
-total. Drawn entirely with PIL primitives (no copied art). Output:
-entry.png, 1024x1024, <= 1 MiB, deterministic.
+"Big Read" REBUILD #5: plum masthead with a giant serif date, KTT
+Shenzhen hero scene redrawn with BIG figures (three presidents at one
+table, larger flags + gold nameplates on the table) with a 33pt
+headline, 3 LEAD panels (ICJ #1, COP31 #3, Cyclone Akvan #4) at 162px
+height with 22pt headlines and 13pt decks, 9 illustrated flagship
+cards at 105px with 32px scenes and 13pt decks (GTA VI demoted to
+card #5), 20 one-line briefs numbered 14-33 without gaps, numbers +
+region strips, a small WHERE IT HAPPENED map beside the briefs, DATE
+CHECK footer. 33 stories total. Drawn entirely with PIL primitives
+(no copied art). Output: entry.png, 1024x1024, <= 1 MiB, deterministic.
 """
 import os
 from PIL import Image, ImageDraw, ImageFont
@@ -329,11 +330,16 @@ def draw_flag(draw, x, y, w, h, kind):
 
 
 def scene_apec_hero(draw, x, y, w, h):
-    """Hero: three presidents at one summit table, flags behind them,
-    gold APEC 2026 SHENZHEN banner on top."""
+    """Hero, redrawn rebuild #5: three presidents LARGE at one summit
+    table — big heads + shoulders fill most of the scene, bigger flags
+    behind them, gold nameplates ON the table front, side curtains and
+    gold dividers so no wide empty blue band is left. Gold APEC 2026
+    SHENZHEN banner on top."""
     draw.rectangle([x, y, x + w, y + h], fill=(38, 54, 88))
-    # pale window glow behind the table
-    draw.rectangle([x + 40, y + 22, x + w - 40, y + h - 20],
+    # side curtains + pale window glow behind the table (fills the blue)
+    draw.rectangle([x, y + 15, x + 16, y + h], fill=(28, 40, 66))
+    draw.rectangle([x + w - 16, y + 15, x + w, y + h], fill=(28, 40, 66))
+    draw.rectangle([x + 40, y + 18, x + w - 40, y + h - 14],
                    fill=(64, 84, 124))
     f = SANS_B(11)
     label = "APEC 2026 \u00b7 SHENZHEN"
@@ -341,44 +347,58 @@ def scene_apec_hero(draw, x, y, w, h):
     draw.rectangle([x, y, x + w, y + 15], fill=GOLD)
     draw.text((x + (w - tw) / 2, y + 2), label, font=f, fill=NAVY)
     step = w // 3
+    # thin gold dividers between the three leaders
+    for dx in (step, 2 * step):
+        draw.line([(x + dx, y + 16), (x + dx, y + h - 12)], fill=GOLD, width=1)
     for i, kind in enumerate(("US", "CN", "RU")):
         cx = x + step * i + step // 2
-        draw_flag(draw, cx - 68, y + 34, 34, 22, kind)
-    table_y = y + h - 16
+        draw_flag(draw, cx - 68, y + 30, 40, 26, kind)
+    table_y = y + h - 12
     draw.rectangle([x + 4, table_y, x + w - 4, y + h], fill=(122, 84, 52),
                    outline=INK, width=1)
-    # Shorter hero scene (h ~74): shrink the leaders so their heads
-    # clear the gold banner (face top = table_y - body_h - 8 - r).
-    body_h, r = (42, 15) if h >= 90 else ((22, 10) if h >= 72 else (28, 12))
+    # BIG leaders: heads clear the banner by 2px, shoulders fill the scene
+    body_h, r = (34, 13) if h >= 80 else ((22, 10) if h >= 72 else (28, 12))
     draw_leader(draw, x + step // 2, table_y, (30, 30, 34), BRICK,
-                (226, 196, 90), "TRUMP", "sweep", body_h=body_h, r=r, label=True)
+                (226, 196, 90), "TRUMP", "sweep", body_h=body_h, r=r, label=False)
     draw_leader(draw, x + step + step // 2, table_y, (30, 30, 34), BRICK,
-                (20, 20, 20), "XI", "flat", body_h=body_h, r=r, label=True)
+                (20, 20, 20), "XI", "flat", body_h=body_h, r=r, label=False)
     draw_leader(draw, x + 2 * step + step // 2, table_y, (30, 30, 34),
                 (40, 80, 160), (200, 200, 200), "PUTIN", "recede",
-                body_h=body_h, r=r, label=True)
+                body_h=body_h, r=r, label=False)
+    # gold nameplates on the table front, under each leader
+    pf = SANS_B(8)
+    for i, name in enumerate(("TRUMP", "XI", "PUTIN")):
+        cx = x + step * i + step // 2
+        tw = draw.textlength(name, font=pf)
+        draw.rectangle([cx - 30, table_y + 1, cx + 30, y + h - 1],
+                       fill=GOLD, outline=INK, width=1)
+        draw.text((cx - tw / 2, table_y + 3), name, font=pf, fill=NAVY)
 
 
 def scene_gta_mini(draw, x, y, w, h):
-    """Mini Vice City scene: purple sunset, skyline, low car, big VI."""
+    """Mini Vice City scene: purple sunset, skyline, low car, big VI.
+    Height-aware: building heights and the VI scale with h (60px lead
+    panel or 32px flagship card)."""
+    s = h / 60.0
     bands = [((88, 40, 120), 0.0, 0.45), ((168, 62, 138), 0.45, 0.72),
              ((226, 122, 66), 0.72, 1.0)]
     for col, a, b in bands:
         draw.rectangle([x, y + h * a, x + w, y + h * b], fill=col)
-    horizon = y + h - 12
+    horizon = y + h - round(12 * s)
     for bx, bh, bw in [(0, 16, 34), (36, 24, 26), (64, 18, 30), (96, 26, 24),
                        (122, 16, 32), (156, 24, 26), (184, 18, 30),
                        (216, 26, 24), (242, 16, 32), (276, 24, 26),
                        (304, 18, 24)]:
-        draw.rectangle([x + bx, horizon - bh, x + bx + bw, horizon],
+        draw.rectangle([x + bx, horizon - round(bh * s), x + bx + bw, horizon],
                        fill=(52, 26, 78), outline=INK, width=1)
     draw.rectangle([x, horizon, x + w, y + h], fill=(36, 30, 40))
-    cx0, cy0 = x + w - 108, horizon + 2
-    draw.rounded_rectangle([cx0, cy0, cx0 + 62, cy0 + 7], radius=3,
+    cx0, cy0 = x + w - 108, horizon + round(2 * s)
+    draw.rounded_rectangle([cx0, cy0, cx0 + 62, cy0 + round(7 * s)], radius=3,
                            fill=(198, 60, 90), outline=INK, width=1)
-    draw.polygon([(cx0 + 14, cy0), (cx0 + 22, cy0 - 6), (cx0 + 42, cy0 - 6),
-                  (cx0 + 50, cy0)], fill=(120, 30, 60), outline=INK)
-    f = SERIF_B(30)
+    draw.polygon([(cx0 + 14, cy0), (cx0 + 22, cy0 - round(6 * s)),
+                  (cx0 + 42, cy0 - round(6 * s)), (cx0 + 50, cy0)],
+                 fill=(120, 30, 60), outline=INK)
+    f = SERIF_B(30 if h >= 50 else 22)
     draw.text((x + 8, y + 2), "VI", font=f, fill=(52, 26, 78))
     draw.text((x + 6, y), "VI", font=f, fill=(255, 255, 255))
     bf = SANS_B(9)
@@ -435,15 +455,23 @@ def scene_riyadh(draw, x, y, w, h):
 
 
 def scene_akvan(draw, x, y, w, h):
-    """Cyclone Akvan: spiral over a coastline map."""
+    """Cyclone Akvan: spiral over a coastline map. Spiral scales with h
+    (32px card or 60px lead panel); at lead height the 120,000
+    evacuations get a label on the land."""
     draw.rectangle([x, y, x + w, y + h], fill=(178, 214, 222))
     # land (left) vs sea (right)
     draw.polygon([(x, y), (x + 120, y), (x + 96, y + h), (x, y + h)],
                  fill=(232, 220, 180), outline=INK)
     draw.text((x + 14, y + h - 14), "ODISHA", font=SANS_B(9), fill=(120, 90, 40))
+    if h >= 50:
+        draw.text((x + 10, y + 6), "120,000 EVACUATED", font=SANS_B(9),
+                  fill=BRICK)
     cx, cy = x + 210, y + h // 2
+    s = h / 32.0
     for r in (13, 9, 6, 3):
-        draw.arc([cx - r, cy - r, cx + r, cy + r], 20, 300, fill=TEAL, width=3)
+        rr = round(r * s)
+        draw.arc([cx - rr, cy - rr, cx + rr, cy + rr], 20, 300, fill=TEAL,
+                 width=4 if h >= 50 else 3)
     draw.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=BRICK)
 
 
@@ -558,30 +586,31 @@ HERO = dict(num=2, kicker="SHENZHEN \u00b7 SUMMIT \u2014 APEC 2026",
             scene=scene_apec_hero)
 
 TOP3 = [
-    dict(num=3, kicker="THE HAGUE \u00b7 WORLD COURT",
+    dict(num=1, kicker="THE HAGUE \u00b7 WORLD COURT",
          headline="World Court holds Myanmar responsible",
          deck="9\u20136 vote; reparations ordered. (Al Jazeera)",
          scene=scene_icj),
-    dict(num=4, kicker="ANTALYA \u00b7 CLIMATE",
+    dict(num=3, kicker="ANTALYA \u00b7 CLIMATE",
          headline="COP31 draft drops fossil fuels",
          deck="$120bn adaptation aid cut from draft. (Reuters)",
          scene=scene_cop31),
-    dict(num=1, kicker="WORLDWIDE \u00b7 GAMES \u2014 OUT NOW",
-         headline="GTA VI is out \u2014 Vice City opens after 13 years",
-         deck="Rave reviews at midnight \u00b7 $79.99 (Rockstar)",
-         scene=scene_gta_mini),
+    dict(num=4, kicker="ODISHA \u00b7 STORM",
+         headline="Cyclone Akvan nears India\u2019s coast",
+         deck="Odisha evacuates 120,000 as storm nears. (Reuters)",
+         scene=scene_akvan),
 ]
 
 TEXT9 = [
-    dict(num=5, kicker="CRIMEA \u00b7 WAR", headline="Russia reports Kerch Bridge hit",
+    dict(num=5, kicker="WORLDWIDE \u00b7 GAMES \u2014 OUT NOW",
+         headline="GTA VI is out \u2014 Vice City opens",
+         deck="After 13 years \u00b7 rave reviews \u00b7 $79.99 (Rockstar)",
+         scene=scene_gta_mini),
+    dict(num=6, kicker="CRIMEA \u00b7 WAR", headline="Russia reports Kerch Bridge hit",
          deck="Third strike in a week halts trains. (Reuters)", tag="CLAIM",
          scene=scene_kerch),
-    dict(num=6, kicker="RIYADH \u00b7 WAR", headline="Saudis: Houthi missiles hit Riyadh",
+    dict(num=7, kicker="RIYADH \u00b7 WAR", headline="Saudis: Houthi missiles hit Riyadh",
          deck="Defences shot most down; debris damages PIF Tower. (Reuters \u00b7 AFP)",
          tag="CLAIM", scene=scene_riyadh),
-    dict(num=7, kicker="ODISHA \u00b7 STORM", headline="Cyclone Akvan nears India\u2019s coast",
-         deck="Odisha evacuates 120,000; landfall Fri. (Reuters)",
-         scene=scene_akvan),
     dict(num=8, kicker="SEOUL \u00b7 JUSTICE", headline="Top court orders Han retrial",
          deck="Court overturns part of Han\u2019s conviction. (AP)",
          scene=scene_seoul),
@@ -617,12 +646,18 @@ BRIEFS = [
     (25, "SOMALIA", "Expels UAE envoy.", "Reuters"),
     (26, "BRAZIL", "Lula backs 42-hour week.", "Reuters"),
     (27, "S. KOREA", "Exports pass $1 trillion.", "Reuters"),
+    (28, "ESTONIA", "Russia border crossings to shut.", "Reuters"),
+    (29, "CZECHIA", "Prague protest for media freedom.", "AP"),
+    (30, "SPAIN", "General strike hits ports, factories.", "Reuters"),
+    (31, "PRETORIA", "Rate held at 7.25%.", "SABC"),
+    (32, "CLIMATE", "Reefs face extinction in 50 yrs.", "Nature"),
+    (33, "SAUDI ARABIA", "Danger passed in 3 cities.", "Reuters"),
 ]
 
 REGIONS = [
-    ("ASIA 7", PLUM), ("MIDDLE EAST 2", (122, 74, 31)), ("EUROPE 5", NAVY),
-    ("AFRICA 3", (60, 120, 70)), ("AMERICAS 4", (110, 70, 140)),
-    ("OCEANIA 2", TEAL), ("GLOBAL 4", GREY),
+    ("ASIA 7", PLUM), ("MIDDLE EAST 3", (122, 74, 31)), ("EUROPE 8", NAVY),
+    ("AFRICA 4", (60, 120, 70)), ("AMERICAS 4", (110, 70, 140)),
+    ("OCEANIA 2", TEAL), ("GLOBAL 5", GREY),
 ]
 
 NUMBERS = [
@@ -659,16 +694,17 @@ SOURCES_LINE = (
 # ------------------------------------------------------------------ map
 # Numbered pins: the 13 lead stories (lon, lat; nudged only where two
 # pins would otherwise touch — every pin still sits on land, never in
-# the sea). Dots: the briefs. Two briefs share a flagship's city
-# (UK ~ The Hague, South Korea ~ Seoul), so they have no separate dot.
+# the sea). Dots: the briefs. Three briefs share a flagship's city
+# (UK ~ The Hague, South Korea ~ Seoul, Saudi Arabia ~ Riyadh) and the
+# CLIMATE brief is a global study, so those four have no separate dot.
 MAP_PINS = [
-    (1, -80.2, 25.8),    # GTA VI — Vice City = Miami
+    (1, 4.3, 52.1),      # The Hague (ICJ)
     (2, 114.1, 22.5),    # Shenzhen summit
-    (3, 4.3, 52.1),      # The Hague
-    (4, 30.0, 36.5),     # Antalya
-    (5, 40.0, 48.5),     # Kerch
-    (6, 46.7, 24.6),     # Riyadh
-    (7, 86.0, 20.0),     # Odisha
+    (3, 30.0, 36.5),     # Antalya (COP31)
+    (4, 86.0, 20.0),     # Odisha (Akvan)
+    (5, -80.2, 25.8),    # GTA VI — Vice City = Miami
+    (6, 40.0, 48.5),     # Kerch
+    (7, 46.7, 24.6),     # Riyadh
     (8, 127.0, 37.5),    # Seoul
     (9, -51.7, 64.2),    # Greenland (Nuuk)
     (10, -71.0, 43.0),   # New York
@@ -690,6 +726,10 @@ MAP_DOTS = [
     (-87.6, 41.9),    # 24 USA (Chicago)
     (48.0, 0.0),      # 25 Somalia
     (-47.9, -15.8),   # 26 Brazil
+    (24.7, 59.4),     # 28 Estonia (Tallinn)
+    (14.4, 50.1),     # 29 Czechia (Prague)
+    (-3.7, 40.4),     # 30 Spain (Madrid)
+    (28.2, -25.7),    # 31 Pretoria
 ]
 
 _NA = [(-168, 66), (-158, 58), (-145, 60), (-135, 57), (-128, 50), (-124, 42),
@@ -812,7 +852,7 @@ def main():
     # ---- kicker line
     y = 8
     d.text((X0, y), "THE WORLD IN ONE DAY", font=SANS_B(13), fill=PLUM)
-    r = "27 STORIES \u00b7 7 REGIONS \u00b7 ONE DAY"
+    r = "33 STORIES \u00b7 7 REGIONS \u00b7 ONE DAY"
     d.text((X1 - d.textlength(r, font=SANS_B(13)), y), r, font=SANS_B(13), fill=NAVY)
 
     # ---- plum masthead band: giant date + subhead inside the band
@@ -825,7 +865,7 @@ def main():
            fill=(255, 255, 255))
     f = SERIF_I(13)
     t = ("Three presidents meet in Shenzhen \u00b7 The World Court rules on genocide "
-         "\u00b7 GTA VI goes on sale")
+         "\u00b7 COP31 drops fossil fuels")
     d.text(((W - d.textlength(t, font=f)) / 2, y + 44), t, font=f, fill=GOLD_LT)
 
     # ---- region strip
@@ -857,26 +897,25 @@ def main():
             d.line([(x, y + 2), (x, y + 34)], fill=(190, 180, 165), width=1)
     hline(d, X0, X1, 153, fill=INK, w=1)
 
-    # ---- HERO: KTT Shenzhen scene + headline band (rebuild #4: scene
-    # 80 -> 74px, headline 28 -> 33pt; leaders shrink so heads clear
-    # the banner and nameplates stay inside the scene)
+    # ---- HERO: KTT Shenzhen scene + headline band (rebuild #5: scene
+    # 74 -> 84px with BIG redrawn leaders, headline 33pt; leaders sized
+    # so heads clear the banner and nameplates sit on the table)
     y = 155
     HH = 162
     d.rectangle([X0, y, X1, y + HH], fill=(255, 255, 255), outline=INK, width=1)
-    HERO["scene"](d, X0 + 1, y + 1, CW - 2, 74)
-    ty = y + 80
+    HERO["scene"](d, X0 + 1, y + 1, CW - 2, 84)
+    ty = y + 88
     badge_num(d, X0 + 10, ty + 2, HERO["num"], 18)
     d.text((X0 + 34, ty + 4), HERO["kicker"], font=SANS_B(11), fill=PLUM)
     tag(d, X1 - 92, ty + 3, "REPORTED")
     f = SERIF_B(33)
     d.text((X0 + 10, ty + 20), HERO["headline"], font=f, fill=INK)
-    d.text((X0 + 10, ty + 62), fit_one(d, HERO["deck"], SANS(14), CW - 20),
+    d.text((X0 + 10, ty + 58), fit_one(d, HERO["deck"], SANS(14), CW - 20),
            font=SANS(14), fill=INK)
 
-    # ---- top 3 stories as LEAD PANELS (rebuild #4: 150 -> 162px tall,
-    # 22pt headlines, 13pt decks, 60px scenes — the structural
-    # legibility lever: big panels survive at 300px where small type
-    # does not)
+    # ---- top 3 stories as LEAD PANELS (rebuild #5: ICJ #1, COP31 #3,
+    # Akvan #4 — GTA demoted to a flagship card; 162px tall, 22pt
+    # headlines, 13pt decks, 60px scenes)
     y = 323
     TH, TW = 162, 329
     for i, story in enumerate(TOP3):
@@ -918,17 +957,18 @@ def main():
                 deck_lines[1] = fit_one(d, deck_lines[1], SANS(13), CWd - 12)
             text_block(d, x + 6, yy + 73, deck_lines, SANS(13), INK, leading=14)
 
-    # ---- briefs: 14 one-liners, 2 columns x 7 rows, + WHERE IT HAPPENED
-    # map on the right (rebuild #4: briefs cut 18 -> 14, renumbered 14-27,
-    # no gaps; ESTONIA / CZECHIA / SPAIN / PRETORIA cut as weakest)
-    y = 824
+    # ---- briefs: 20 one-liners, 2 columns x 10 rows, + WHERE IT HAPPENED
+    # map on the right (rebuild #5: briefs restored 14 -> 20, renumbered
+    # 14-33, no gaps; ESTONIA / CZECHIA / SPAIN / PRETORIA back, plus
+    # CLIMATE + SAUDI ARABIA; 11pt type, 11px leading to fit 10 rows)
+    y = 820
     d.text((X0, y), "ALSO ON THURSDAY 19 NOVEMBER 2026", font=SANS_B(14), fill=INK)
-    brief_w = 656
+    brief_w = 664
     col_w = (brief_w - 12) / 2
-    f_b, f_r = SANS_B(12), SANS(12)
+    f_b, f_r = SANS_B(11), SANS(11)
     for ci in range(2):
-        col_items = BRIEFS[ci * 7:(ci + 1) * 7]
-        yy = y + 22
+        col_items = BRIEFS[ci * 10:(ci + 1) * 10]
+        yy = y + 20
         cx0 = X0 + ci * (col_w + 12)
         for num, place, text, src in col_items:
             head = "%d %s \u2014 " % (num, place)
@@ -942,21 +982,21 @@ def main():
             # rest may have been truncated: recompute from the fitted line
             fitted_rest = line[len(head):]
             d.text((nx, yy), fitted_rest, font=f_r, fill=INK)
-            yy += 13
-    draw_map(d, X0 + brief_w + 12, y, X1 - (X0 + brief_w + 12), 112)
+            yy += 11
+    draw_map(d, X0 + brief_w + 12, y, X1 - (X0 + brief_w + 12), 128)
 
-    # ---- footer: DATE CHECK box (rebuild #4: 12pt leading)
-    y = 942
+    # ---- footer: DATE CHECK box (rebuild #5: 11pt leading)
+    y = 954
     f = SANS(11)
     lines = wrap(d, DATE_CHECK, f, CW - 20)
-    box_h = 10 + len(lines) * 12
+    box_h = 8 + len(lines) * 11
     d.rectangle([X0, y, X1, y + box_h], outline=PLUM, width=2)
-    text_block(d, X0 + 10, y + 5, lines, f, INK, leading=12)
+    text_block(d, X0 + 10, y + 4, lines, f, INK, leading=11)
 
     # ---- legend + sources
-    y = y + box_h + 6
+    y = y + box_h + 4
     d.text((X0, y), LEGEND, font=SANS(11), fill=INK)
-    d.text((X0, y + 14), SOURCES_LINE, font=SANS(10), fill=GREY)
+    d.text((X0, y + 12), SOURCES_LINE, font=SANS(10), fill=GREY)
 
     img.save("entry.png", optimize=True)
     print("saved entry.png", img.size, os.path.getsize("entry.png"), "bytes")
