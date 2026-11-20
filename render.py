@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Render the make.fun news-image-20261119 entry 3/3 for agent 4.
 
-"Big Read" REBUILD #1: plum masthead with a giant serif date, KTT
+"Big Read" REBUILD #2: plum masthead with a giant serif date, KTT
 Shenzhen hero scene (three presidents at one table), 12 illustrated
-flagship cards (a small scene above every headline), 20 one-line
-briefs, numbers + region strips, DATE CHECK footer. 33 stories total.
-Drawn entirely with PIL primitives (no copied art). Output: entry.png,
-1024x1024, <= 1 MiB, deterministic.
+flagship cards (a small scene above every headline), 18 one-line
+briefs, numbers + region strips, a small WHERE IT HAPPENED map beside
+the briefs, DATE CHECK footer. 31 stories total. Bigger type throughout
+(card headlines 17pt, decks 12pt, briefs 12pt, footer 11pt) so the page
+stays readable at 300px. Drawn entirely with PIL primitives (no copied
+art). Output: entry.png, 1024x1024, <= 1 MiB, deterministic.
 """
 import os
 from PIL import Image, ImageDraw, ImageFont
@@ -436,7 +438,7 @@ def scene_akvan(draw, x, y, w, h):
                  fill=(232, 220, 180), outline=INK)
     draw.text((x + 14, y + h - 14), "ODISHA", font=SANS_B(9), fill=(120, 90, 40))
     cx, cy = x + 210, y + h // 2
-    for r in (22, 16, 10, 5):
+    for r in (13, 9, 6, 3):
         draw.arc([cx - r, cy - r, cx + r, cy + r], 20, 300, fill=TEAL, width=3)
     draw.ellipse([cx - 3, cy - 3, cx + 3, cy + 3], fill=BRICK)
 
@@ -513,9 +515,9 @@ def scene_bogota(draw, x, y, w, h):
 def scene_nairobi(draw, x, y, w, h):
     """Nairobi marathon: running track lanes + a runner."""
     draw.rectangle([x, y, x + w, y + h], fill=(232, 220, 200))
-    for i, yy in enumerate((y + 8, y + 18, y + 28)):
-        draw.rectangle([x, yy, x + w, yy + 6], fill=(178, 84, 52))
-        draw.line([(x, yy + 3), (x + w, yy + 3)], fill=(255, 255, 255), width=1)
+    for i, yy in enumerate((y + 4, y + 12, y + 20)):
+        draw.rectangle([x, yy, x + w, yy + 5], fill=(178, 84, 52))
+        draw.line([(x, yy + 2), (x + w, yy + 2)], fill=(255, 255, 255), width=1)
     # runner: head, torso, limbs mid-stride
     hx, hy = x + 250, y + 8
     draw.ellipse([hx - 5, hy - 5, hx + 5, hy + 5], fill=(90, 60, 40),
@@ -532,18 +534,16 @@ def scene_nairobi(draw, x, y, w, h):
 def scene_canberra(draw, x, y, w, h):
     """Canberra jobs: bar chart of the jobless rate climbing to 4.9%."""
     draw.rectangle([x, y, x + w, y + h], fill=(255, 255, 255))
-    base = y + h - 6
+    base = y + h - 4
     draw.line([(x + 14, base), (x + w - 10, base)], fill=GREY, width=1)
-    vals = [("4.1", 12), ("4.3", 16), ("4.6", 20), ("4.9", 24)]
+    vals = [("4.1", 10), ("4.3", 13), ("4.6", 16), ("4.9", 19)]
     for i, (lbl, bh) in enumerate(vals):
-        bx = x + 60 + i * 62
+        bx = x + 56 + i * 60
         col = PLUM if i == 3 else NAVY
-        draw.rectangle([bx, base - bh, bx + 34, base], fill=col, outline=INK,
+        draw.rectangle([bx, base - bh, bx + 30, base], fill=col, outline=INK,
                        width=1)
-        f = SANS_B(9)
-        tw = draw.textlength(lbl + "%", font=f)
-        draw.text((bx + (34 - tw) / 2, base - bh - 12), lbl + "%", font=f,
-                  fill=col)
+        f = SANS_B(8)
+        draw.text((bx + 33, base - bh), lbl + "%", font=f, fill=col)
 
 
 # ------------------------------------------------------------------ content
@@ -560,11 +560,11 @@ TOP3 = [
          scene=scene_icj),
     dict(num=4, kicker="ANTALYA \u00b7 CLIMATE",
          headline="COP31 draft drops fossil fuels",
-         deck="$120bn adaptation aid goal cut from draft. (Reuters)",
+         deck="$120bn adaptation aid cut from draft. (Reuters)",
          scene=scene_cop31),
     dict(num=1, kicker="WORLDWIDE \u00b7 GAMES \u2014 OUT NOW",
          headline="GTA VI is out \u2014 Vice City opens after 13 years",
-         deck="Midnight launch \u00b7 rave reviews \u00b7 $79.99. (Rockstar)",
+         deck="Midnight launch \u00b7 rave reviews \u00b7 $79.99 (Rockstar)",
          scene=scene_gta_mini),
 ]
 
@@ -572,23 +572,23 @@ TEXT9 = [
     dict(num=5, kicker="CRIMEA \u00b7 WAR", headline="Ukraine hits Kerch Bridge again",
          deck="Third strike in a week halts trains. (Reuters)", tag="CLAIM",
          scene=scene_kerch),
-    dict(num=6, kicker="RIYADH \u00b7 WAR", headline="Houthi missiles hit Riyadh tower",
-         deck="Missiles strike PIF Tower in the capital. (Reuters \u00b7 AFP)",
-         tag="REPORTED", scene=scene_riyadh),
+    dict(num=6, kicker="RIYADH \u00b7 WAR", headline="Houthi missiles strike Riyadh tower",
+         deck="Saudis say defences shot most down; debris damages PIF Tower. (Reuters \u00b7 AFP)",
+         tag="CLAIM", scene=scene_riyadh),
     dict(num=7, kicker="ODISHA \u00b7 STORM", headline="Cyclone Akvan nears India\u2019s coast",
-         deck="Odisha evacuates 120,000; landfall Friday. (Reuters)",
+         deck="Odisha evacuates 120,000; landfall Fri. (Reuters)",
          scene=scene_akvan),
     dict(num=8, kicker="SEOUL \u00b7 JUSTICE", headline="Top court orders Han retrial",
-         deck="Court overturns part of ex-PM Han\u2019s conviction. (AP)",
+         deck="Court overturns part of Han\u2019s conviction. (AP)",
          scene=scene_seoul),
     dict(num=9, kicker="GREENLAND \u00b7 SECURITY", headline="Denmark backs Arctic pact, 109\u20130",
-         deck="Parliament votes unanimously for the US pact. (Reuters)",
+         deck="Parliament backs US pact unanimously. (Reuters)",
          scene=scene_greenland),
     dict(num=10, kicker="NEW YORK \u00b7 MARKETS", headline="Anthropic lists; shares jump 17%",
          deck="$81.3bn valuation; closes at $97.17. (Reuters)",
          scene=scene_anthropic),
     dict(num=11, kicker="BOGOT\u00c1 \u00b7 LABOUR", headline="Unions hold national strike",
-         deck="Paro nacional disrupts cities nationwide. (Reuters)",
+         deck="Paro nacional disrupts cities. (Reuters)",
          scene=scene_bogota),
     dict(num=12, kicker="NAIROBI \u00b7 SPORT", headline="Marathon champion banned 3 years",
          deck="Jepchirchir suspended for doping. (AP)",
@@ -599,38 +599,36 @@ TEXT9 = [
 ]
 
 BRIEFS = [
-    (14, "GOLD", "Slides to $3,757/oz, lowest since Sept 2025.", "Reuters"),
-    (15, "FINLAND", "Approves Onkalo, world\u2019s first nuclear waste store.", "Reuters"),
-    (16, "ESTONIA", "Plans to shut Russia border crossings from Dec.", "Reuters"),
-    (17, "CZECHIA", "Huge Prague protest for media independence.", "AP"),
-    (18, "SPAIN", "General strike disrupts ports and factories.", "Reuters"),
-    (19, "YEMEN", "Houthi rocket kills 53 soldiers at army camp.", "Reuters"),
-    (20, "GERMANY", "Russian arrested for spying on US firm Palantir.", "AP"),
-    (21, "INDIA\u2013JAPAN", "2+2 defence talks open in Tokyo.", "Reuters"),
-    (22, "WELLINGTON", "Court: pay equity cuts broke rights law.", "RNZ"),
-    (23, "INDIA", "\u2018Ramayana\u2019 crosses \u20b91,000 crore in 14 days.", "AP"),
-    (24, "UK", "MAIB Report 22/2026: Bayesian had unrecognised wind vulnerability.", "gov.uk"),
-    (25, "JAKARTA", "Asset law passed in parliament.", "Reuters"),
-    (26, "PRETORIA", "Central bank holds rate at 7.25%.", "SABC"),
-    (27, "CLIMATE", "Nearly all coral reefs face extinction in 50 years.", "Nature"),
-    (28, "LIBYA", "Cocaine and millions of pills seized in the east.", "Reuters"),
-    (29, "SAUDI ARABIA", "Danger passed in three southern cities.", "Reuters"),
-    (30, "USA", "Senators warn AI cyber threats outpace defences.", "AP"),
+    (14, "GOLD", "$3,757/oz, lowest since Sept.", "Reuters"),
+    (15, "FINLAND", "Onkalo waste store OK'd.", "Reuters"),
+    (16, "ESTONIA", "To shut Russia border Dec.", "Reuters"),
+    (17, "CZECHIA", "Big Prague media protest.", "AP"),
+    (18, "SPAIN", "Strike hits ports, factories.", "Reuters"),
+    (19, "YEMEN", "Houthi rocket kills 53.", "Reuters"),
+    (20, "GERMANY", "Russian held for Palantir spying.", "AP"),
+    (21, "INDIA\u2013JAPAN", "2+2 talks in Tokyo.", "Reuters"),
+    (22, "WELLINGTON", "Equity pay cuts unlawful.", "RNZ"),
+    (23, "INDIA", "\u2018Ramayana\u2019 tops \u20b91,000 crore.", "AP"),
+    (24, "UK", "MAIB: Bayesian wind flaw.", "gov.uk"),
+    (25, "JAKARTA", "Asset law passed.", "Reuters"),
+    (26, "PRETORIA", "Bank holds rate at 7.25%.", "SABC"),
+    (28, "LIBYA", "Cocaine, pills seized in east.", "Reuters"),
+    (30, "USA", "AI cyber threats outpace defences.", "AP"),
     (31, "SOMALIA", "Expels UAE envoy.", "Reuters"),
-    (32, "BRAZIL", "Lula backs shorter work week, 44 \u2192 42 hours.", "Reuters"),
-    (33, "SOUTH KOREA", "Exports pass $1 trillion.", "Reuters"),
+    (32, "BRAZIL", "Lula backs 42-hour week.", "Reuters"),
+    (33, "S. KOREA", "Exports pass $1 trillion.", "Reuters"),
 ]
 
 REGIONS = [
-    ("ASIA 7", PLUM), ("MIDDLE EAST 3", (122, 74, 31)), ("EUROPE 8", NAVY),
+    ("ASIA 7", PLUM), ("MIDDLE EAST 2", (122, 74, 31)), ("EUROPE 8", NAVY),
     ("AFRICA 4", (60, 120, 70)), ("AMERICAS 4", (110, 70, 140)),
-    ("OCEANIA 2", TEAL), ("GLOBAL 5", GREY),
+    ("OCEANIA 2", TEAL), ("GLOBAL 4", GREY),
 ]
 
 NUMBERS = [
     ("3", "presidents at one table"),
     ("9\u20136", "World Court vote"),
-    ("$81.3bn", "record IPO"),
+    ("$81.3bn", "record valuation"),
     ("109\u20130", "Arctic pact vote"),
     ("4.9%", "Australian jobless rate"),
     ("$120bn", "COP31 aid goal cut"),
@@ -658,6 +656,157 @@ SOURCES_LINE = (
 )
 
 
+# ------------------------------------------------------------------ map
+# Numbered pins: the 13 lead stories (lon, lat; nudged only where two
+# pins would otherwise touch — every pin still sits on land, never in
+# the sea). Dots: the briefs. Two briefs share a flagship's city
+# (UK ~ The Hague, South Korea ~ Seoul), so they have no separate dot.
+MAP_PINS = [
+    (1, -80.2, 25.8),    # GTA VI — Vice City = Miami
+    (2, 114.1, 22.5),    # Shenzhen summit
+    (3, 4.3, 52.1),      # The Hague
+    (4, 30.0, 36.5),     # Antalya
+    (5, 40.0, 48.5),     # Kerch
+    (6, 46.7, 24.6),     # Riyadh
+    (7, 86.0, 20.0),     # Odisha
+    (8, 127.0, 37.5),    # Seoul
+    (9, -51.7, 64.2),    # Greenland (Nuuk)
+    (10, -71.0, 43.0),   # New York
+    (11, -74.1, 4.7),    # Bogota
+    (12, 36.8, -1.3),    # Nairobi
+    (13, 149.1, -35.3),  # Canberra
+]
+
+MAP_DOTS = [
+    (115.9, -31.9),   # 14 gold (Perth)
+    (25.0, 60.0),     # 15 Finland
+    (28.0, 57.0),     # 16 Estonia
+    (16.0, 49.0),     # 17 Czechia
+    (-3.7, 40.3),     # 18 Spain
+    (45.0, 12.8),     # 19 Yemen
+    (13.4, 52.5),     # 20 Germany
+    (139.7, 35.7),    # 21 Tokyo
+    (174.8, -41.3),   # 22 Wellington
+    (77.2, 28.6),     # 23 India
+    (106.8, -6.2),    # 25 Jakarta
+    (28.2, -25.7),    # 26 Pretoria
+    (13.2, 32.9),     # 28 Libya
+    (-87.6, 41.9),    # 30 USA (Chicago)
+    (48.0, 0.0),      # 31 Somalia
+    (-47.9, -15.8),   # 32 Brazil
+]
+
+_NA = [(-168, 66), (-158, 58), (-145, 60), (-135, 57), (-128, 50), (-124, 42),
+       (-120, 34), (-114, 29), (-108, 23), (-102, 18), (-96, 16), (-90, 14),
+       (-84, 12), (-80, 9), (-77, 7), (-79, 9), (-82, 13), (-86, 15),
+       (-88, 18), (-91, 19), (-96, 19), (-97, 26), (-93, 30), (-88, 30),
+       (-83, 30), (-81, 26), (-80, 32), (-76, 35), (-74, 40), (-70, 42),
+       (-66, 44), (-60, 46), (-56, 48), (-60, 51), (-64, 54), (-60, 55),
+       (-64, 59), (-69, 60), (-76, 62), (-83, 66), (-90, 67), (-96, 69),
+       (-108, 68), (-122, 70), (-138, 70), (-152, 71), (-162, 70), (-168, 66)]
+_GREENLAND = [(-56, 62), (-50, 60), (-43, 60), (-38, 64), (-30, 68), (-22, 70),
+              (-18, 74), (-24, 77), (-34, 77), (-46, 75), (-56, 72), (-58, 68),
+              (-56, 62)]
+_SA = [(-77, 7), (-71, 11), (-63, 10), (-58, 8), (-53, 5), (-50, 0),
+       (-45, -3), (-38, -5), (-35, -8), (-38, -15), (-41, -22), (-48, -27),
+       (-53, -33), (-58, -38), (-63, -41), (-66, -46), (-69, -51), (-71, -54),
+       (-73, -48), (-73, -38), (-72, -28), (-70, -19), (-75, -15), (-79, -8),
+       (-81, -4), (-80, 0), (-79, 4), (-77, 7)]
+_EUROPE = [(-10, 36), (-9, 39), (-9, 43), (-4, 44), (-2, 47), (-4, 49),
+           (-1, 50), (2, 51), (4, 53), (8, 55), (7, 57), (10, 59), (6, 60),
+           (6, 62), (11, 64), (16, 66), (21, 68), (26, 71), (30, 70),
+           (31, 67), (28, 63), (24, 60), (21, 57), (19, 54), (15, 54),
+           (11, 54), (8, 57), (5, 58), (3, 55), (0, 53), (-3, 50), (-5, 48),
+           (-8, 44), (-9, 41), (-10, 38), (-10, 36)]
+_UK = [(-5, 50), (-3, 53), (-5, 56), (-2, 58), (0, 57), (1, 53), (-1, 51),
+       (-4, 50)]
+_AFRICA = [(-17, 15), (-16, 21), (-14, 27), (-10, 31), (-5, 35), (0, 36),
+           (10, 37), (11, 34), (19, 32), (30, 31), (32, 31), (35, 28),
+           (38, 21), (40, 17), (43, 12), (48, 11), (51, 10), (48, 5),
+           (44, 0), (40, -6), (38, -12), (35, -18), (33, -26), (29, -31),
+           (25, -34), (20, -35), (17, -32), (14, -27), (13, -20), (12, -15),
+           (13, -10), (9, -2), (9, 4), (5, 6), (-2, 5), (-8, 5), (-13, 8),
+           (-17, 12), (-17, 15)]
+_ASIA = [(30, 36), (40, 38), (48, 42), (55, 45), (62, 48), (70, 52),
+         (78, 56), (86, 60), (94, 64), (102, 68), (110, 71), (118, 73),
+         (126, 72), (134, 70), (142, 66), (150, 62), (158, 60), (166, 63),
+         (174, 66), (179, 66), (170, 60), (162, 56), (156, 51), (150, 48),
+         (142, 44), (138, 38), (133, 34), (129, 31), (127, 33), (122, 30),
+         (120, 27), (115, 23), (110, 20), (108, 16), (105, 10), (103, 7),
+         (101, 3), (98, 8), (95, 15), (92, 21), (88, 22), (85, 19),
+         (82, 15), (80, 12), (77, 8), (75, 12), (73, 17), (70, 21),
+         (66, 25), (61, 25), (57, 27), (53, 27), (50, 29), (48, 30),
+         (44, 30), (40, 32), (36, 36), (32, 36), (30, 36)]
+_JAPAN = [(130, 31), (132, 33), (135, 35), (138, 37), (140, 39), (141, 42),
+          (143, 44), (141, 41), (139, 38), (136, 35), (132, 33), (130, 31)]
+_PHILIPPINES = [(120, 18), (122, 16), (122, 12), (120, 10), (121, 14)]
+_AUSTRALIA = [(113, -22), (114, -30), (115, -35), (120, -34), (124, -33),
+              (129, -32), (132, -32), (135, -35), (137, -38), (140, -38),
+              (143, -39), (146, -39), (149, -37), (152, -33), (153, -27),
+              (150, -22), (146, -19), (142, -15), (142, -11), (140, -17),
+              (136, -15), (135, -12), (132, -12), (130, -13), (126, -14),
+              (122, -17), (118, -20), (113, -22)]
+_NZ = [(167, -45), (169, -43), (172, -41), (174, -39), (176, -38), (174, -41),
+       (171, -44), (168, -46)]
+_INDONESIA = [(95, 5), (100, 0), (105, -3), (110, -7), (115, -8), (120, -9),
+              (125, -8), (131, -3), (136, -2), (141, -5)]
+
+
+def draw_map(draw, x, y, w, h):
+    """Small flat-cream world map: numbered pins for the 13 lead stories,
+    dots for the briefs. Schematic continents, equirectangular."""
+    draw.rectangle([x, y, x + w, y + h], fill=(250, 244, 228), outline=INK,
+                   width=1)
+    draw.text((x + 8, y + 5), "WHERE IT HAPPENED", font=SANS_B(11), fill=PLUM)
+    mx, my = x + 4, y + 22
+    mw, mh = w - 8, h - 40
+    draw.rectangle([mx, my, mx + mw, my + mh], fill=(243, 234, 210),
+                   outline=(140, 120, 70), width=1)
+
+    def px(lon):
+        return mx + (lon + 180.0) * mw / 360.0
+
+    def py(lat):
+        return my + (90.0 - lat) * mh / 150.0
+
+    # faint graticule (under the land)
+    for lon in range(-120, 181, 60):
+        draw.line([(px(lon), my), (px(lon), my + mh)], fill=(222, 210, 175),
+                  width=1)
+    for lat in (60, 30, 0, -30):
+        draw.line([(mx, py(lat)), (mx + mw, py(lat))], fill=(222, 210, 175),
+                  width=1)
+
+    def poly(pts):
+        draw.polygon([(px(lon), py(lat)) for lon, lat in pts],
+                     fill=(201, 184, 130), outline=(140, 120, 70))
+
+    for pts in (_NA, _GREENLAND, _SA, _EUROPE, _UK, _AFRICA, _ASIA, _JAPAN,
+                _PHILIPPINES, _AUSTRALIA, _NZ):
+        poly(pts)
+    for lon, lat in _INDONESIA:
+        cx, cy = px(lon), py(lat)
+        draw.ellipse([cx - 3, cy - 2, cx + 3, cy + 2],
+                     fill=(201, 184, 130), outline=(140, 120, 70))
+
+    # brief dots first, pins on top
+    for lon, lat in MAP_DOTS:
+        cx, cy = px(lon), py(lat)
+        draw.ellipse([cx - 2.5, cy - 2.5, cx + 2.5, cy + 2.5], fill=NAVY,
+                     outline=(255, 255, 255), width=1)
+    for n, lon, lat in MAP_PINS:
+        cx, cy = px(lon), py(lat)
+        draw.ellipse([cx - 6, cy - 6, cx + 6, cy + 6], fill=PLUM,
+                     outline=(255, 255, 255), width=1)
+        f = SANS_B(7)
+        s = str(n)
+        tw = draw.textlength(s, font=f)
+        draw.text((cx - tw / 2, cy - 4), s, font=f, fill=(255, 255, 255))
+
+    draw.text((x + 8, y + h - 14), "1\u201313 lead stories  \u00b7  dots = briefs",
+              font=SANS(9), fill=INK)
+
+
 def main():
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
@@ -667,7 +816,7 @@ def main():
     # ---- kicker line
     y = 8
     d.text((X0, y), "THE WORLD IN ONE DAY", font=SANS_B(13), fill=PLUM)
-    r = "33 STORIES \u00b7 7 REGIONS \u00b7 ONE DAY"
+    r = "31 STORIES \u00b7 7 REGIONS \u00b7 ONE DAY"
     d.text((X1 - d.textlength(r, font=SANS_B(13)), y), r, font=SANS_B(13), fill=NAVY)
 
     # ---- plum masthead band: giant date + subhead inside the band
@@ -713,22 +862,23 @@ def main():
     hline(d, X0, X1, 158, fill=INK, w=1)
 
     # ---- HERO: KTT Shenzhen scene + headline band (rebuild #1: the
-    # summit, not the game, leads the page)
+    # summit, not the game, leads the page; rebuild #2: scene shorter,
+    # headline + deck bigger)
     y = 164
-    HH = 196
+    HH = 170
     d.rectangle([X0, y, X1, y + HH], fill=(255, 255, 255), outline=INK, width=1)
-    HERO["scene"](d, X0 + 1, y + 1, CW - 2, 128)
-    ty = y + 134
+    HERO["scene"](d, X0 + 1, y + 1, CW - 2, 96)
+    ty = y + 102
     badge_num(d, X0 + 10, ty + 2, HERO["num"], 18)
     d.text((X0 + 34, ty + 4), HERO["kicker"], font=SANS_B(11), fill=PLUM)
     tag(d, X1 - 92, ty + 3, "REPORTED")
-    f = SERIF_B(26)
-    d.text((X0 + 10, ty + 22), HERO["headline"], font=f, fill=INK)
-    d.text((X0 + 10, ty + 50), fit_one(d, HERO["deck"], SANS(13), CW - 20),
-           font=SANS(13), fill=INK)
+    f = SERIF_B(28)
+    d.text((X0 + 10, ty + 20), HERO["headline"], font=f, fill=INK)
+    d.text((X0 + 10, ty + 50), fit_one(d, HERO["deck"], SANS(14), CW - 20),
+           font=SANS(14), fill=INK)
 
     # ---- top 3 stories with small scenes (ICJ, COP31, GTA VI)
-    y = 366
+    y = 340
     TH, TW = 122, 329
     for i, story in enumerate(TOP3):
         x = X0 + i * (TW + 8)
@@ -736,17 +886,18 @@ def main():
         story["scene"](d, x + 1, y + 1, TW - 2, 48)
         ty = y + 53
         badge_num(d, x + 6, ty, story["num"], 15)
-        d.text((x + 25, ty + 2), story["kicker"], font=SANS_B(9), fill=PLUM)
+        d.text((x + 25, ty + 2), story["kicker"], font=SANS_B(10), fill=PLUM)
         tag(d, x + TW - 70, ty + 1, "REPORTED")
-        hl = wrap(d, story["headline"], SERIF_B(16), TW - 12)
-        ty2 = text_block(d, x + 6, ty + 17, hl[:2], SERIF_B(16), INK, leading=17)
+        hl = wrap(d, story["headline"], SERIF_B(17), TW - 12)
+        ty2 = text_block(d, x + 6, ty + 17, hl[:2], SERIF_B(17), INK, leading=18)
         d.text((x + 6, ty2 + 2),
-               fit_one(d, story["deck"], SANS(11), TW - 12), font=SANS(11), fill=INK)
+               fit_one(d, story["deck"], SANS(12), TW - 12), font=SANS(12), fill=INK)
 
     # ---- 9 flagship stories, 3 rows x 3 columns: each with a mini scene
-    # above its headline (rebuild #1: no more text-only cards)
-    y0 = 494
-    CH, CWd = 88, 329
+    # above its headline (rebuild #1: no more text-only cards; rebuild #2:
+    # taller cards, 17pt headlines, 12pt decks wrapping to 2 lines)
+    y0 = 468
+    CH, CWd = 96, 329
     for r in range(3):
         for c in range(3):
             story = TEXT9[r * 3 + c]
@@ -754,28 +905,30 @@ def main():
             yy = y0 + r * (CH + 6)
             d.rectangle([x, yy, x + CWd, yy + CH], fill=(255, 255, 255),
                         outline=INK, width=1)
-            story["scene"](d, x + 1, yy + 1, CWd - 2, 36)
-            badge_num(d, x + 6, yy + 41, story["num"], 15)
-            d.text((x + 25, yy + 43), story["kicker"], font=SANS_B(10), fill=PLUM)
-            tag(d, x + CWd - 70, yy + 42, story.get("tag", "REPORTED"))
-            d.text((x + 6, yy + 58),
-                   fit_one(d, story["headline"], SERIF_B(15), CWd - 12),
-                   font=SERIF_B(15), fill=INK)
-            d.text((x + 6, yy + 74),
-                   fit_one(d, story["deck"], SANS(11), CWd - 12),
-                   font=SANS(11), fill=INK)
+            story["scene"](d, x + 1, yy + 1, CWd - 2, 28)
+            badge_num(d, x + 6, yy + 32, story["num"], 15)
+            d.text((x + 25, yy + 34), story["kicker"], font=SANS_B(11), fill=PLUM)
+            tag(d, x + CWd - 70, yy + 33, story.get("tag", "REPORTED"))
+            hfont = SERIF_B(17)
+            while hfont.size > 14 and d.textlength(story["headline"],
+                                                   font=hfont) > CWd - 12:
+                hfont = SERIF_B(hfont.size - 1)
+            d.text((x + 6, yy + 52), story["headline"], font=hfont, fill=INK)
+            deck_lines = wrap(d, story["deck"], SANS(12), CWd - 12)[:2]
+            if len(deck_lines) == 2:
+                deck_lines[1] = fit_one(d, deck_lines[1], SANS(12), CWd - 12)
+            text_block(d, x + 6, yy + 70, deck_lines, SANS(12), INK, leading=13)
 
-    # ---- briefs: 20 one-liners, 2 columns x 10 rows
-    y = 776
+    # ---- briefs: 18 one-liners, 2 columns x 9 rows, + WHERE IT HAPPENED
+    # map on the right (rebuild #2: bigger type + a map anchor)
+    y = 774
     d.text((X0, y), "ALSO ON THURSDAY 19 NOVEMBER 2026", font=SANS_B(14), fill=INK)
-    r = "place \u00b7 what happened \u00b7 source"
-    d.text((X1 - d.textlength(r, font=SANS_O(9)), y + 4), r, font=SANS_O(9),
-           fill=GREY)
-    col_w = (CW - 12) / 2
-    f_b, f_r = SANS_B(11), SANS(11)
+    brief_w = 656
+    col_w = (brief_w - 12) / 2
+    f_b, f_r = SANS_B(12), SANS(12)
     for ci in range(2):
-        col_items = BRIEFS[ci * 10:(ci + 1) * 10]
-        yy = y + 20
+        col_items = BRIEFS[ci * 9:(ci + 1) * 9]
+        yy = y + 22
         cx0 = X0 + ci * (col_w + 12)
         for num, place, text, src in col_items:
             head = "%d %s \u2014 " % (num, place)
@@ -789,19 +942,21 @@ def main():
             # rest may have been truncated: recompute from the fitted line
             fitted_rest = line[len(head):]
             d.text((nx, yy), fitted_rest, font=f_r, fill=INK)
-            yy += 12
+            yy += 14
+    draw_map(d, X0 + brief_w + 12, y, X1 - (X0 + brief_w + 12), 148)
 
-    # ---- footer: DATE CHECK box
-    y = 920
-    d.rectangle([X0, y, X1, y + 52], outline=PLUM, width=2)
-    f = SANS(10)
+    # ---- footer: DATE CHECK box (rebuild #2: 11pt type)
+    y = 928
+    f = SANS(11)
     lines = wrap(d, DATE_CHECK, f, CW - 20)
-    text_block(d, X0 + 10, y + 6, lines, f, INK, leading=13)
+    box_h = 10 + len(lines) * 13
+    d.rectangle([X0, y, X1, y + box_h], outline=PLUM, width=2)
+    text_block(d, X0 + 10, y + 5, lines, f, INK, leading=13)
 
     # ---- legend + sources
-    y = 978
-    d.text((X0, y), LEGEND, font=SANS(10), fill=INK)
-    d.text((X0, y + 14), SOURCES_LINE, font=SANS(9), fill=GREY)
+    y = y + box_h + 6
+    d.text((X0, y), LEGEND, font=SANS(11), fill=INK)
+    d.text((X0, y + 14), SOURCES_LINE, font=SANS(10), fill=GREY)
 
     img.save("entry.png", optimize=True)
     print("saved entry.png", img.size, os.path.getsize("entry.png"), "bytes")
